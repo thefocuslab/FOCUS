@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FOCUS Lab</title>
+<style>
+/* ── TOKENS ── */
+:root{
+  --cyan:#7DE8EA;--yellow:#F7D358;--pink:#E98D9B;--ok:#b8f0b8;
+  --ink:#0d0d0d;--muted:#5a5a6a;--faint:#f0f4f4;--white:#ffffff;--border:#111;
+  --danger:#c0392b;--r:10px;--shadow:3px 3px 0 #111;--nav-h:60px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media(prefers-color-scheme:dark){:root{
+  --ink:#f0f0f0;--muted:#aaa;--faint:#1a1d1d;--white:#131616;--border:#555;--shadow:3px 3px 0 #555;--danger:#ff8a7a;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--ink);font:16px/1.6 "Inter","Helvetica Neue",Arial,sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font:inherit;color:inherit}
+input,textarea,select{font:inherit}
+h1,h2,h3,h4{line-height:1.2;font-weight:800}
+:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+
+/* Anything on a coloured surface always uses dark text, light or dark mode */
+.btn:not(.btn-ghost):not(.btn-danger),.chip,.tile,.hero-tile,.card-cyan,.card-yellow,.card-pink,.alert-cyan,.alert-yellow,.alert-pink,
+.cta-band,.msg-mine,.avatar,.badge-icon.earned,.steps-ol li::before,.stat-card.c-cyan,.stat-card.c-yellow,.stat-card.c-pink,.toast.ok{color:#0d0d0d}
+.card-cyan,.card-yellow,.card-pink,.alert-cyan,.alert-yellow,.alert-pink,.cta-band,.stat-card.c-cyan,.stat-card.c-yellow,.stat-card.c-pink,.msg-mine{--ink:#0d0d0d;--muted:#2f2f2f}
+
+/* ── UTILITY ── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+.hide{display:none!important}
+.muted{color:var(--muted)}
+.mb{margin-bottom:16px}.mt{margin-top:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.small{font-size:13px}
+.late{color:var(--danger)}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:13px;font-weight:700;border:2px solid var(--border)}
+.chip-cyan{background:var(--cyan)}.chip-yellow{background:var(--yellow)}.chip-pink{background:var(--pink)}
+.chip-green{background:var(--ok)}.chip-grey{background:#e0e0e0}
+
+/* ── BUTTONS (animated) ── */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border:2.5px solid var(--border);border-radius:var(--r);font-weight:700;font-size:15px;background:var(--yellow);box-shadow:var(--shadow);transition:transform .15s var(--ease),box-shadow .15s var(--ease),background-color .2s,color .2s;user-select:none;-webkit-tap-highlight-color:transparent}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--border)}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--border)}
+.btn .ripple{position:absolute;border-radius:50%;background:rgba(0,0,0,.2);transform:scale(0);animation:ripple .6s linear;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.btn-cyan{background:var(--cyan)}.btn-pink{background:var(--pink)}.btn-ok{background:var(--ok)}
+.btn-ghost{background:transparent;box-shadow:none;color:var(--ink)}
+.btn-ghost:hover{background:var(--faint);box-shadow:3px 3px 0 var(--border)}
+.btn-ghost .ripple{background:rgba(125,125,125,.3)}
+.btn-danger{background:transparent;color:var(--danger);border-color:var(--danger);box-shadow:none}
+.btn-danger:hover{background:var(--danger);color:#fff;box-shadow:3px 3px 0 var(--border)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-full{width:100%}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn.busy{pointer-events:none;color:transparent}
+.btn.busy::after{content:"";position:absolute;width:18px;height:18px;border:3px solid #0d0d0d;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(247,211,88,.0)}50%{box-shadow:var(--shadow),0 0 0 7px rgba(247,211,88,.45)}}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:2.5px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.card.lift:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--border)}
+.card-cyan{background:var(--cyan)}.card-yellow{background:var(--yellow)}.card-pink{background:var(--pink)}
+.card-flat{box-shadow:none}
+
+/* ── FORMS ── */
+.field{margin-bottom:18px}
+.field label,.lbl{display:block;font-weight:700;margin-bottom:6px;font-size:14px}
+.field input,.field textarea,.field select,.inp{width:100%;padding:10px 14px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--white);color:var(--ink);font-size:15px;transition:box-shadow .2s,transform .2s}
+.field input:focus,.field textarea:focus,.field select:focus,.inp:focus{outline:3px solid var(--cyan);outline-offset:0}
+.field textarea{resize:vertical;min-height:90px}
+.field .hint{font-size:13px;color:var(--muted);margin-top:4px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;padding:6px 0}
+.check input{width:18px;height:18px;accent-color:var(--cyan)}
+.form-error{background:#fde8e8;color:#7a1f14;border:2px solid #c0392b;border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-weight:600;font-size:14px}
+.form-error.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ── PROGRESS ── */
+.prog-track{background:#e0e0e0;border-radius:20px;height:12px;border:2px solid var(--border);overflow:hidden}
+.prog-fill{height:100%;width:var(--w,0%);border-radius:20px;background:var(--cyan);animation:grow .9s var(--ease) both}
+.prog-fill.pink{background:var(--pink)}.prog-fill.yellow{background:var(--yellow)}
+@keyframes grow{from{width:0}}
+
+/* ── NAV ── */
+#pub-nav,#app-nav{position:sticky;top:0;z-index:100;border-bottom:2.5px solid var(--border)}
+#pub-nav{background:var(--white)}
+#app-nav{background:#0d0d0d;color:#fff}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);gap:12px}
+.logo{display:flex;gap:4px;align-items:center}
+.tile{width:32px;height:32px;border:2.5px solid var(--border);border-radius:6px;display:grid;place-items:center;font-weight:900;font-size:14px;transition:transform .25s var(--ease)}
+.logo:hover .tile{transform:translateY(-3px) rotate(-6deg)}
+.logo:hover .tile:nth-child(2){transition-delay:.04s}.logo:hover .tile:nth-child(3){transition-delay:.08s}.logo:hover .tile:nth-child(4){transition-delay:.12s}
+.tile-c{background:var(--cyan)}.tile-y{background:var(--yellow)}.tile-p{background:var(--pink)}
+.logo-text{font-weight:900;font-size:18px;letter-spacing:.04em;margin-left:4px}
+#app-nav .tile{border-color:rgba(255,255,255,.35)}
+.pub-links{display:flex;gap:20px;list-style:none}
+.pub-links a{font-weight:600;font-size:15px;opacity:.8;position:relative;padding:2px 0}
+.pub-links a::after{content:"";position:absolute;left:0;bottom:-2px;height:3px;width:100%;background:var(--pink);transform:scaleX(0);transform-origin:left;transition:transform .25s var(--ease)}
+.pub-links a:hover{opacity:1}.pub-links a:hover::after{transform:scaleX(1)}
+.nav-actions,.app-actions{display:flex;gap:10px;align-items:center}
+.menu-toggle{display:none;background:none;border:2px solid var(--border);border-radius:6px;padding:6px 10px;font-size:18px;transition:transform .15s}
+.menu-toggle:active{transform:scale(.9)}
+#app-menu-toggle{border-color:rgba(255,255,255,.35);color:#fff}
+.mobile-menu{display:none;flex-direction:column;border-top:2px solid var(--border);background:var(--white);max-height:calc(100vh - var(--nav-h));overflow-y:auto}
+.mobile-menu.open{display:flex;animation:slideDown .25s var(--ease)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}}
+.mobile-menu a,.mobile-menu button{padding:14px 20px;font-weight:600;text-align:left;background:none;border:none;border-bottom:1px solid var(--faint);font-size:16px;color:var(--ink);display:flex;align-items:center;gap:10px;width:100%}
+#app-mobile-menu{background:#0d0d0d;border-top-color:rgba(255,255,255,.2)}
+#app-mobile-menu button{color:#fff;border-bottom-color:rgba(255,255,255,.08)}
+.nav-user{font-size:14px;font-weight:600;opacity:.85;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bell{position:relative;background:none;border:none;font-size:20px;padding:6px 8px;color:#fff;transition:transform .2s}
+.bell:hover{transform:scale(1.15) rotate(-8deg)}
+.bell.ring{animation:ring 1.2s .4s 2}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}}
+.count{background:var(--pink);color:#0d0d0d;font-size:11px;font-weight:800;border-radius:20px;min-width:20px;height:20px;padding:0 6px;display:inline-grid;place-items:center;border:2px solid #0d0d0d;margin-left:auto;animation:pop .35s var(--ease)}
+.bell .count{position:absolute;top:-2px;right:-4px;margin:0}
+@media(max-width:700px){.pub-links,.nav-actions .btn:not(.btn-sm){display:none}#menu-toggle{display:block}}
+@media(max-width:800px){#app-menu-toggle{display:block}.nav-user,.app-actions .logout-btn{display:none}}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:block;animation:pageIn .45s var(--ease)}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px)}}
+.view-enter{animation:pageIn .4s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.stagger>*{animation:pageIn .5s var(--ease) both}
+.stagger>*:nth-child(2){animation-delay:.05s}.stagger>*:nth-child(3){animation-delay:.1s}.stagger>*:nth-child(4){animation-delay:.15s}
+.stagger>*:nth-child(5){animation-delay:.2s}.stagger>*:nth-child(6){animation-delay:.25s}.stagger>*:nth-child(n+7){animation-delay:.3s}
+
+/* ── PUBLIC HOME ── */
+.hero{padding:72px 0 60px;text-align:center}
+.hero-tiles{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:32px;flex-wrap:wrap}
+.hero-tile{width:clamp(72px,14vw,110px);aspect-ratio:1;border:3.5px solid var(--border);border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px;position:relative;animation:pop .6s var(--ease) both;transition:transform .3s var(--ease)}
+.hero-tile:hover{transform:translateY(-8px) rotate(-4deg)}
+.hero-tile.y{animation-delay:.12s}
+.hero-tile .num{position:absolute;top:7px;right:10px;font-weight:700;font-size:clamp(12px,2vw,15px)}
+.hero-tile .sym{font-weight:900;font-size:clamp(38px,9vw,66px);line-height:1}
+.hero-tile .el{font-size:clamp(9px,1.5vw,12px);font-weight:600}
+.hero-tile.c{background:var(--cyan)}.hero-tile.y{background:var(--yellow)}.hero-tile.p{background:var(--pink)}
+.hero-word{font-size:clamp(44px,12vw,90px);font-weight:900;letter-spacing:.05em;animation:pop .6s .24s var(--ease) both}
+.hero h1{font-size:clamp(26px,5vw,44px);max-width:18ch;margin:0 auto 16px}
+.hero p{max-width:50ch;margin:0 auto 28px;color:var(--muted);font-size:18px}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.tagline{font-size:13px;letter-spacing:.25em;text-transform:uppercase;margin-top:20px;color:var(--muted);font-weight:600}
+.divider{border:none;border-top:2.5px solid var(--border)}
+.section{padding:56px 0}
+.section-title{font-size:clamp(22px,4vw,34px);margin-bottom:8px}
+.section-sub{color:var(--muted);font-size:17px;margin-bottom:32px;max-width:56ch}
+.grid-3{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grid-2{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.steps-ol{list-style:none;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));counter-reset:st}
+.steps-ol li{counter-increment:st;display:flex;gap:14px;padding:18px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--faint);transition:transform .2s var(--ease)}
+.steps-ol li:hover{transform:translateY(-4px)}
+.steps-ol li::before{content:counter(st);flex:none;width:34px;height:34px;border:2.5px solid var(--border);border-radius:6px;background:var(--cyan);display:grid;place-items:center;font-weight:900}
+.steps-ol li:nth-child(2)::before,.steps-ol li:nth-child(5)::before{background:var(--yellow)}
+.steps-ol li:nth-child(3)::before,.steps-ol li:nth-child(6)::before{background:var(--pink)}
+.cta-band{background:var(--yellow);border:3px solid var(--border);border-radius:14px;padding:48px 32px;text-align:center}
+.cta-band h2{font-size:clamp(22px,4vw,34px);margin-bottom:12px}
+.cta-band p{color:var(--muted);margin:0 auto 24px;max-width:44ch}
+.prose-page{max-width:700px;margin:0 auto;padding:56px 20px}
+.prose-page h1{font-size:clamp(28px,5vw,42px);margin-bottom:16px}
+.prose-page h2{font-size:22px;margin:36px 0 10px}
+.prose-page p{color:var(--muted);margin-bottom:14px;line-height:1.7}
+.prose-page ul{color:var(--muted);padding-left:20px;line-height:1.8;margin-bottom:14px}
+
+/* ── AUTH ── */
+.role-cards{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:28px}
+.role-card{border:2.5px solid var(--border);border-radius:var(--r);padding:24px;cursor:pointer;transition:box-shadow .2s var(--ease),transform .2s var(--ease),background .2s;background:var(--white);text-align:left;width:100%}
+.role-card:hover{box-shadow:var(--shadow);transform:translate(-2px,-2px)}
+.role-card.selected{border-color:var(--ink);box-shadow:var(--shadow);background:var(--faint);animation:selPop .35s var(--ease)}
+@keyframes selPop{50%{transform:scale(1.03)}}
+.role-card h3{font-size:20px;margin:10px 0 6px}
+.role-card p{color:var(--muted);font-size:14px;margin-bottom:8px}
+.auth-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px}
+.auth-wrap h1{font-size:28px;margin-bottom:6px}
+.auth-wrap .sub{color:var(--muted);margin-bottom:28px}
+
+/* ── DASHBOARD ── */
+.dash-shell{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - var(--nav-h))}
+@media(max-width:800px){.dash-shell{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{border-right:2.5px solid var(--border);padding:16px 0;background:var(--faint)}
+.sidebar ul{list-style:none;position:sticky;top:calc(var(--nav-h) + 16px)}
+.side-btn{display:flex;align-items:center;gap:10px;padding:10px 20px;font-weight:600;font-size:14px;color:var(--ink);background:none;border:none;width:100%;text-align:left;border-right:4px solid transparent;transition:background .15s,padding-left .2s var(--ease)}
+.side-btn:hover{background:var(--cyan);padding-left:26px;color:#0d0d0d}
+.side-btn.active{background:var(--cyan);border-right-color:var(--border);color:#0d0d0d}
+.side-btn .ic{width:22px;text-align:center}
+.sidebar-section{font-size:11px;font-weight:800;letter-spacing:.1em;padding:16px 20px 4px;color:var(--muted);text-transform:uppercase}
+.main-content{padding:28px 24px;overflow-x:hidden;min-width:0;outline:none}
+@media(max-width:600px){.main-content{padding:16px 14px}}
+.page-title{font-size:clamp(22px,4vw,30px);margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:15px;margin-bottom:24px}
+h3.sec{margin:24px 0 12px}
+.eyebrow{color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.stat-row{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:24px}
+.stat-card{border:2.5px solid var(--border);border-radius:var(--r);padding:16px;background:var(--white);transition:transform .2s var(--ease)}
+.stat-card:hover{transform:translateY(-4px)}
+.stat-card.c-cyan{background:var(--cyan)}.stat-card.c-yellow{background:var(--yellow)}.stat-card.c-pink{background:var(--pink)}
+.stat-num{font-size:clamp(28px,5vw,40px);font-weight:900;line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600}
+.empty{border:2.5px dashed var(--border);border-radius:var(--r);padding:36px 20px;text-align:center;background:var(--faint)}
+.empty .em-ic{font-size:36px;margin-bottom:6px;display:inline-block;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.empty h3{margin-bottom:6px}
+.empty p{color:var(--muted);max-width:44ch;margin:0 auto 14px}
+
+/* goals */
+.goal-card{border:2.5px solid var(--border);border-radius:var(--r);padding:18px 20px;background:var(--white);box-shadow:var(--shadow);margin-bottom:14px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.goal-card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--border)}
+.goal-card h3{font-size:18px;margin:8px 0 2px}
+.meta{color:var(--muted);font-size:13px}
+.goal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ms-list{list-style:none;display:flex;flex-direction:column;gap:2px;margin:10px 0}
+.ms{display:flex;align-items:center;gap:10px;background:none;border:none;padding:5px 4px;border-radius:8px;width:100%;text-align:left;font-size:14px;transition:background .15s}
+.ms:not([disabled]):hover{background:var(--faint)}
+.ms-box{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--border);flex:none;display:grid;place-items:center;font-size:12px;font-weight:900;transition:background .2s,transform .2s;color:#0d0d0d}
+.ms.done .ms-box{background:var(--cyan)}
+.ms.done .ms-t{text-decoration:line-through;color:var(--muted)}
+.ms.just .ms-box{animation:checkPop .5s var(--ease)}
+@keyframes checkPop{0%{transform:scale(.4)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.pill{padding:7px 16px;border:2.5px solid var(--border);border-radius:30px;background:var(--white);font-weight:700;font-size:14px;transition:transform .15s var(--ease),background .2s}
+.pill:hover{transform:translateY(-2px)}
+.pill.active{background:var(--cyan);color:#0d0d0d}
+
+/* people / lists */
+.member-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1.5px solid var(--faint);flex-wrap:wrap}
+.member-row:last-child{border-bottom:none}
+.avatar{width:40px;height:40px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-weight:800;font-size:16px;flex:none}
+.av-c{background:var(--cyan)}.av-y{background:var(--yellow)}.av-p{background:var(--pink)}
+.msg-wrap{display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:420px;padding:4px 2px;min-height:200px;flex:1}
+.msg-bubble{max-width:78%;padding:10px 14px;border-radius:14px;border:2px solid var(--border);font-size:14px;white-space:pre-wrap;word-break:break-word;animation:pop .3s var(--ease)}
+.msg-mine{align-self:flex-end;background:var(--cyan)}
+.msg-theirs{align-self:flex-start;background:var(--faint)}
+.msg-time{font-size:11px;color:var(--muted);margin-top:3px}
+.msg-mine+.msg-time{text-align:right}
+.msg-input-row{display:flex;gap:8px;margin-top:12px}
+.msg-input-row input{flex:1;padding:10px 14px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--white);color:var(--ink)}
+.journal-entry{border:2.5px solid var(--border);border-radius:var(--r);padding:16px;background:var(--white);margin-bottom:12px}
+.je-title{font-weight:700;font-size:16px}
+.notif-item{display:flex;gap:12px;align-items:flex-start;padding:12px 8px;border-bottom:1.5px solid var(--faint);cursor:pointer;border-radius:8px;transition:background .15s}
+.notif-item:hover{background:var(--faint)}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:12px;height:12px;border-radius:50%;background:var(--cyan);border:2px solid var(--border);flex:none;margin-top:6px}
+.notif-dot.read{background:transparent;opacity:.4}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px;margin-bottom:18px}
+.badge{text-align:center;padding:14px 8px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--white);transition:transform .2s var(--ease)}
+.badge:hover{transform:translateY(-4px) rotate(-2deg)}
+.badge-icon{width:56px;height:56px;border:2.5px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:26px;margin:0 auto 6px}
+.badge-icon.earned{background:var(--yellow)}
+.badge-icon.locked{background:var(--faint);filter:grayscale(1);opacity:.55}
+.badge b{display:block;font-size:13px}.badge small{font-size:11px;color:var(--muted)}
+.tab-row{display:flex;border-bottom:2.5px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab-btn{padding:10px 18px;border:none;background:none;font-weight:700;font-size:14px;color:var(--muted);border-bottom:4px solid transparent;margin-bottom:-2.5px;white-space:nowrap;transition:color .15s,border-color .2s}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--pink)}
+.tab-pane{display:none}.tab-pane.active{display:block;animation:pageIn .3s var(--ease)}
+.alert{padding:12px 16px;border-radius:var(--r);border:2px solid var(--border);margin-bottom:16px;font-weight:600;font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;animation:pageIn .4s var(--ease)}
+.alert-cyan{background:var(--cyan)}.alert-yellow{background:var(--yellow)}.alert-pink{background:var(--pink)}
+.alert .btn{margin-left:auto}
+.answer{font-size:14px;margin-bottom:8px}.answer b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fb-box{background:var(--cyan);color:#0d0d0d;border:2px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;font-size:14px}
+.fb-box b{display:block;font-size:12px;margin-bottom:2px}
+details summary{cursor:pointer;font-weight:700;font-size:14px;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:10px 12px;border-bottom:2.5px solid var(--border);font-weight:700;font-size:13px;color:var(--muted)}
+td{padding:10px 12px;border-bottom:1.5px solid var(--faint);vertical-align:middle}
+tbody tr{transition:background .15s}tbody tr:hover td{background:var(--faint)}
+.search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-row input{flex:1;min-width:200px}
+.search-row select{padding:9px 14px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--white);color:var(--ink)}
+.search-row input{padding:9px 14px;border:2.5px solid var(--border);border-radius:var(--r);background:var(--white);color:var(--ink)}
+.code-box{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:18px;letter-spacing:.12em;background:var(--faint);border:2px dashed var(--border);border-radius:8px;padding:10px 14px;display:inline-block;margin:6px 0 12px}
+.notice{font-size:13px;color:var(--muted);border-left:4px solid var(--yellow);padding:8px 12px;background:var(--faint);border-radius:0 8px 8px 0;margin-bottom:16px}
+
+/* ── MODAL / TOAST ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:grid;place-items:center;padding:20px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.modal-box{background:var(--white);border:3px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:6px 6px 0 var(--border);animation:modalIn .35s var(--ease)}
+@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(.94)}}
+.modal-box h2{margin-bottom:16px;font-size:22px;padding-right:30px}
+.modal-close{position:absolute;right:calc(50% - 280px + 14px);background:none;border:none;font-size:22px;color:var(--muted);transition:transform .2s}
+.modal-wrap{position:relative;width:100%;max-width:560px}
+.modal-wrap .modal-close{position:absolute;right:12px;top:10px;z-index:2}
+.modal-close:hover{transform:rotate(90deg);color:var(--ink)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:#0d0d0d;color:#fff;padding:12px 22px;border-radius:30px;font-weight:700;font-size:14px;z-index:500;transition:transform .35s var(--ease);pointer-events:none;max-width:92vw;text-align:center;border:2px solid #fff}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok);border-color:#0d0d0d}
+.toast.error{background:#c0392b;border-color:#0d0d0d}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:400}
+
+/* ── FOOTER ── */
+footer{border-top:2.5px solid var(--border);padding:28px 0;background:var(--faint)}
+.footer-inner{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start}
+footer nav{display:flex;gap:18px;flex-wrap:wrap}
+footer nav a{font-size:14px;font-weight:600;color:var(--muted);transition:color .15s}
+footer nav a:hover{color:var(--ink)}
+.footer-note{font-size:13px;color:var(--muted);margin-top:16px;width:100%}
+.banner{background:var(--pink);color:#0d0d0d;text-align:center;padding:8px 12px;font-weight:700;font-size:14px}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="storage-banner" class="banner hide">Your browser is blocking storage, so nothing you do here can be saved. Try a normal (non-private) window.</div>
+
+<!-- PUBLIC NAV -->
+<nav id="pub-nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#" data-page="home" aria-label="FOCUS home">
+      <span class="tile tile-c">F</span><span class="tile tile-y">O</span><span class="tile tile-c" style="font-size:11px">La</span><span class="tile tile-p">B</span>
+      <span class="logo-text">FOCUS</span>
+    </a>
+    <ul class="pub-links">
+      <li><a href="#" data-page="about">About</a></li>
+      <li><a href="#" data-page="how-it-works">How it works</a></li>
+      <li><a href="#" data-page="contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="btn btn-ghost btn-sm" href="#" data-page="login">Log in</a>
+      <a class="btn btn-sm" href="#" data-page="join">Join FOCUS</a>
+    </div>
+    <button id="menu-toggle" class="menu-toggle" aria-label="Menu" onclick="toggleMenu('mobile-menu')">☰</button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu">
+    <a href="#" data-page="about">About</a>
+    <a href="#" data-page="how-it-works">How it works</a>
+    <a href="#" data-page="contact">Contact</a>
+    <a href="#" data-page="login">Log in</a>
+    <a href="#" data-page="join">Join FOCUS</a>
+  </div>
+</nav>
+
+<!-- APP NAV -->
+<nav id="app-nav" class="hide">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#" onclick="event.preventDefault();goHome()" aria-label="Dashboard">
+      <span class="tile tile-c">F</span><span class="tile tile-y">O</span><span class="tile tile-c" style="font-size:11px">La</span><span class="tile tile-p">B</span>
+      <span class="logo-text">FOCUS</span>
+    </a>
+    <div class="app-actions">
+      <button id="bell" class="bell" aria-label="Notifications" onclick="go('notifications')">🔔<span id="bell-count" class="count hide">0</span></button>
+      <span id="nav-user" class="nav-user"></span>
+      <button class="btn btn-sm btn-pink logout-btn" onclick="handleLogout()">Log out</button>
+      <button id="app-menu-toggle" class="menu-toggle" aria-label="Menu" onclick="toggleMenu('app-mobile-menu')">☰</button>
+    </div>
+  </div>
+  <div id="app-mobile-menu" class="mobile-menu"></div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay hide" id="modal">
+  <div class="modal-wrap">
+    <button class="modal-close" aria-label="Close" onclick="closeModal()">✕</button>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Dialog" id="modal-content"></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="page" id="page-home">
+  <div class="hero"><div class="wrap">
+    <div class="hero-tiles">
+      <div class="hero-tile c"><span class="num">9</span><span class="sym">F</span><span class="el">Fluorine</span></div>
+      <div class="hero-tile y"><span class="num">8</span><span class="sym">O</span><span class="el">Oxygen</span></div>
+      <span class="hero-word">CUS</span>
+    </div>
+    <h1>Become the person you're working towards.</h1>
+    <p>FOCUS turns ambitions into action through structured goals, progress tracking, and mentors who want to see you succeed.</p>
+    <div class="hero-cta">
+      <a class="btn btn-pulse" href="#" data-page="join">Join FOCUS</a>
+      <a class="btn btn-cyan" href="#" data-page="how-it-works">How it works</a>
+    </div>
+    <p class="tagline">Stay focused · Stay fearnot</p>
+  </div></div>
+  <hr class="divider">
+  <div class="section"><div class="wrap">
+    <h2 class="section-title">Three categories. One place.</h2>
+    <p class="section-sub">Every goal you set belongs to one of three areas — or you can span all three at once.</p>
+    <div class="grid-3 stagger">
+      <div class="card card-cyan lift"><div style="font-size:28px;margin-bottom:8px">🎓</div><h3 style="margin-bottom:8px">Academic</h3><p style="font-size:14px">Grades, studying, research, and preparing for what comes next.</p></div>
+      <div class="card card-yellow lift"><div style="font-size:28px;margin-bottom:8px">✨</div><h3 style="margin-bottom:8px">Personal</h3><p style="font-size:14px">Confidence, discipline, habits, and everything in between.</p></div>
+      <div class="card card-pink lift"><div style="font-size:28px;margin-bottom:8px">💪</div><h3 style="margin-bottom:8px">Fitness</h3><p style="font-size:14px">Training, consistency, health, and athletic targets.</p></div>
+    </div>
+  </div></div>
+  <hr class="divider">
+  <div class="section"><div class="wrap">
+    <h2 class="section-title">How FOCUS works</h2>
+    <p class="section-sub">A straightforward journey from ambition to achievement.</p>
+    <ol class="steps-ol">
+      <li><div><strong>Set your goals</strong><br><span class="muted small">One main goal, up to two smaller ones. Skip this and come back later — no pressure.</span></div></li>
+      <li><div><strong>Build your plan</strong><br><span class="muted small">Break your goal into milestones you can tick off.</span></div></li>
+      <li><div><strong>Track your progress</strong><br><span class="muted small">Record what you did, what worked, and what to do next.</span></div></li>
+      <li><div><strong>Submit check-ins</strong><br><span class="muted small">A quick weekly form to keep you and your mentor on the same page.</span></div></li>
+      <li><div><strong>Get mentor guidance</strong><br><span class="muted small">Your mentor sees your goals and progress and gives personalized advice.</span></div></li>
+      <li><div><strong>Reflect and improve</strong><br><span class="muted small">Monthly reflections help you see how far you've come and adjust what isn't working.</span></div></li>
+    </ol>
+  </div></div>
+  <hr class="divider">
+  <div class="section"><div class="wrap"><div class="grid-2" style="align-items:center">
+    <div>
+      <h2 class="section-title">Mentors who know your goals</h2>
+      <p class="muted mb">Your mentor can see your goals, milestones and check-ins, so their advice fits exactly where you are. They send recommendations, give feedback, and keep you accountable.</p>
+      <p class="muted">Your journal stays private. You choose, entry by entry, what to share.</p>
+    </div>
+    <div class="card card-cyan" style="padding:24px">
+      <h3 style="margin-bottom:16px">What your mentor can do</h3>
+      <ul style="padding-left:18px;line-height:2;font-size:15px">
+        <li>Review your goals and progress</li><li>Send personalized recommendations</li><li>Message you directly</li><li>Leave feedback on check-ins</li><li>Create reminders and follow-ups</li>
+      </ul>
+    </div>
+  </div></div></div>
+  <hr class="divider">
+  <div class="section"><div class="wrap"><div class="cta-band">
+    <h2>Ready to set your first goal?</h2>
+    <p>Join FOCUS and start working towards what matters to you. You can skip goal-setting and come back whenever you're ready.</p>
+    <a class="btn btn-cyan" href="#" data-page="join">Join FOCUS</a>
+  </div></div></div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- ABOUT -->
+<div class="page" id="page-about">
+  <div class="prose-page">
+    <h1>About FOCUS</h1>
+    <p style="font-size:18px;margin-bottom:28px">A community built around consistent progress and meaningful mentorship.</p>
+    <h2>Our purpose</h2>
+    <p>FOCUS exists to help people turn ambitions into real, measurable progress. We believe that clarity of goals, consistent habits, and the right guidance can help anyone develop the discipline to achieve what matters to them.</p>
+    <p>We bring together members who want to grow — academically, personally, and physically — and connect them with mentors who are invested in their success.</p>
+    <h2>Our three pillars</h2>
+    <ul>
+      <li><strong>Goals:</strong> Every member sets goals in Academic, Personal, or Fitness. Goals have milestones, deadlines, and action plans that make them achievable.</li>
+      <li><strong>Progress:</strong> Regular check-ins and progress updates create a record of what you've done, what worked, and what needs to change.</li>
+      <li><strong>Mentorship:</strong> Mentors review your goals and progress and provide personalized guidance, feedback, and accountability.</li>
+    </ul>
+    <h2>Our values</h2>
+    <ul>
+      <li><strong>Consistency over intensity</strong> — small steps, sustained over time, beat big bursts of effort.</li>
+      <li><strong>Honesty over performance</strong> — an honest check-in about a difficult week is worth more than a polished one that hides the truth.</li>
+      <li><strong>Privacy by default</strong> — your journal is yours. You decide what your mentor sees.</li>
+      <li><strong>No judgment for setbacks</strong> — a missed milestone is a reason to review, not a reason to give up.</li>
+    </ul>
+    <h2>Who FOCUS is for</h2>
+    <p>FOCUS is for students, young professionals, and anyone who wants a structured way to pursue their goals with support.</p>
+    <div style="margin-top:32px"><a class="btn" href="#" data-page="join">Join FOCUS</a></div>
+  </div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="page" id="page-how-it-works">
+  <div class="prose-page">
+    <h1>How FOCUS works</h1>
+    <p style="font-size:18px;margin-bottom:28px">From signing up to achieving your goals — here's the full journey.</p>
+    <h2>1. Join and create your account</h2>
+    <p>Visit the Join page and choose your account type. Members sign up freely. Mentors and admins need an access code from the FOCUS administrators.</p>
+    <h2>2. Complete your profile</h2>
+    <p>Add a preferred name, a short bio if you'd like, and your preferred check-in day. You can update this any time in Settings.</p>
+    <h2>3. Set your goals (optional at first)</h2>
+    <p>You can set one main goal and up to two smaller goals. Each belongs to Academic, Personal, or Fitness. You can skip this and return later.</p>
+    <h2>4. Break it into milestones</h2>
+    <p>Add milestones to each goal — concrete steps that make a big target feel manageable. Ticking them off moves your progress bar.</p>
+    <h2>5. Track your progress</h2>
+    <p>Whenever you make progress, record it: what you did, what went well, what was difficult, and what's next. The platform builds a history of your development over time.</p>
+    <h2>6. Complete your weekly check-in</h2>
+    <p>Once a week, answer a short set of questions. Check-ins keep you and your mentor aligned, and create an honest record you can look back on.</p>
+    <h2>7. Your mentor steps in</h2>
+    <p>Your assigned mentor can see your goals, progress updates, and check-ins. They'll send recommendations, give feedback, and message you directly. You choose which journal entries to share with them.</p>
+    <h2>8. Monthly reflection</h2>
+    <p>Once a month, take stock of how things went. Monthly reflections are private to you.</p>
+    <h2>9. Grow and adjust</h2>
+    <p>Goals change. FOCUS lets you pause, edit, or complete goals as your circumstances evolve, while keeping a history of your progress.</p>
+    <div style="margin-top:32px"><a class="btn" href="#" data-page="join">Get started</a></div>
+  </div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- CONTACT -->
+<div class="page" id="page-contact">
+  <div class="prose-page" id="contact-body"></div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- PRIVACY / TERMS -->
+<div class="page" id="page-privacy"><div class="prose-page" id="privacy-body"></div><div class="site-footer"></div></div>
+<div class="page" id="page-terms"><div class="prose-page" id="terms-body"></div><div class="site-footer"></div></div>
+
+<!-- JOIN -->
+<div class="page" id="page-join">
+  <div class="auth-wrap" style="max-width:680px">
+    <h1>Join FOCUS</h1>
+    <p class="sub">Choose your account type to get started.</p>
+    <div class="role-cards">
+      <button class="role-card" data-role="member" onclick="selectRole('member')">
+        <span class="chip chip-cyan">Member</span><h3>I'm here to grow</h3>
+        <p>Set personal goals, record your progress, and get support from a mentor.</p>
+        <p class="small">Open registration for FOCUS club members.</p>
+      </button>
+      <button class="role-card" data-role="mentor" onclick="selectRole('mentor')">
+        <span class="chip chip-yellow">Mentor</span><h3>I'm here to guide</h3>
+        <p>Support assigned members, review their goals, and provide guidance.</p>
+        <p class="small">Requires a mentor access code.</p>
+      </button>
+      <button class="role-card" data-role="admin" onclick="selectRole('admin')">
+        <span class="chip chip-pink">Admin</span><h3>I manage FOCUS</h3>
+        <p>Manage members, mentors, assignments, and platform settings.</p>
+        <p class="small">Requires an admin access code — or sets one up if this is a brand-new platform.</p>
+      </button>
+    </div>
+    <div id="role-form-area" style="margin-top:24px"></div>
+  </div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- LOGIN -->
+<div class="page" id="page-login">
+  <div class="auth-wrap">
+    <h1>Welcome back</h1>
+    <p class="sub">Log in to your FOCUS account.</p>
+    <div id="login-error" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="li-email">Email address</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+    <div class="field"><label for="li-pw">Password</label><input id="li-pw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+    <button class="btn btn-full" id="login-btn" onclick="handleLogin()">Log in</button>
+    <p class="muted small" style="text-align:center;margin-top:18px">Don't have an account? <a href="#" data-page="join" style="font-weight:700;color:var(--ink);text-decoration:underline">Join FOCUS</a></p>
+    <p class="small" style="text-align:center;margin-top:10px"><a href="#" data-page="forgot" class="muted" style="text-decoration:underline">Forgot your password?</a></p>
+  </div>
+  <div class="site-footer"></div>
+</div>
+
+<!-- FORGOT -->
+<div class="page" id="page-forgot">
+  <div class="auth-wrap">
+    <h1>Forgot your password?</h1>
+    <p class="sub">FOCUS can't send emails, so a password reset has to come from an administrator.</p>
+    <div class="card card-yellow mb">
+      <h3 style="margin-bottom:8px">What to do</h3>
+      <p style="font-size:14px">Ask a FOCUS admin to reset your password from their Members page. They'll give you a temporary password you can log in with, then change in <strong>Settings → Security</strong>.</p>
+    </div>
+    <p style="text-align:center"><a href="#" data-page="contact" class="btn btn-cyan btn-sm">Contact FOCUS</a> <a href="#" data-page="login" class="btn btn-ghost btn-sm">Back to log in</a></p>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="page" id="page-onboarding">
+  <div style="max-width:640px;margin:0 auto;padding:40px 20px 60px">
+    <div class="logo" style="margin-bottom:32px"><span class="tile tile-c">F</span><span class="tile tile-y">O</span><span class="tile tile-c" style="font-size:11px">La</span><span class="tile tile-p">B</span><span class="logo-text" style="margin-left:8px">FOCUS</span></div>
+    <div id="onboarding-content"></div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="page" id="page-app">
+  <div class="dash-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Sections"></aside>
+    <main class="main-content" id="app-content" tabindex="-1"></main>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   FOCUS Lab — data lives in this browser's localStorage.
+   Nothing is pre-filled: the app starts completely empty.
+   ════════════════════════════════════════════════════════════ */
+const KEY = 'focuslab_db_v1', SKEY = 'focuslab_session';
+let storageOK = true;
+
+function blankDB(){
+  return {v:1,
+    settings:{platformName:'FOCUS Lab',contactEmail:'',mentorCode:'',adminCode:'',allowRegistration:true,requireApproval:false,checkinsRequired:true},
+    users:[],goals:[],updates:[],checkins:[],reflections:[],journal:[],messages:[],recs:[],followups:[],notes:[],
+    notifs:[],announcements:[],audit:[],contacts:[],drafts:{}};
+}
+function loadDB(){
+  try{
+    const r = localStorage.getItem(KEY);
+    if(r){ const d = JSON.parse(r), b = blankDB(); return Object.assign(b, d, {settings:Object.assign(b.settings, d.settings||{})}); }
+  }catch(e){ storageOK = false; }
+  return blankDB();
+}
+let DB = loadDB();
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ storageOK = false; $('#storage-banner').classList.remove('hide'); toast('Your browser blocked saving — changes will be lost when you close this page.','error'); }
+}
+let session = null;
+try{ session = sessionStorage.getItem(SKEY); }catch(e){}
+
+/* ── tiny helpers ── */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const nowISO = () => new Date().toISOString();
+const val = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function localDateStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const todayStr = () => localDateStr(new Date());
+function parseDate(s){ if(/^\d{4}-\d{2}-\d{2}$/.test(s)){ const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); } return new Date(s); }
+function fmtDate(s){ if(!s) return ''; const d = parseDate(s); return MONTHS[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); }
+function fmtDT(s){
+  const d = new Date(s), t = d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const y = new Date(); y.setDate(y.getDate()-1);
+  if(localDateStr(d) === todayStr()) return 'Today '+t;
+  if(localDateStr(d) === localDateStr(y)) return 'Yesterday '+t;
+  return fmtDate(localDateStr(d))+' '+t;
+}
+function weekStartOf(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return localDateStr(x); }
+function weekLabel(ws){
+  const a = parseDate(ws), b = new Date(a); b.setDate(b.getDate()+6);
+  return MONTHS[a.getMonth()]+' '+a.getDate()+'–'+(a.getMonth()===b.getMonth()?'':MONTHS[b.getMonth()]+' ')+b.getDate();
+}
+const daysUntil = s => Math.round((parseDate(s) - parseDate(todayStr())) / 86400000);
+const thisWeek = () => weekStartOf(new Date());
+function timeGreeting(){ const h = new Date().getHours(); return h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening'; }
+function greetName(full){
+  const m = String(full).trim().match(/^(Dr|Prof|Mr|Mrs|Ms|Mx)\.?\s+(.+)$/i);
+  if(m){ const p = m[2].split(/\s+/); return m[1][0].toUpperCase()+m[1].slice(1).toLowerCase()+'. '+p[p.length-1]; }
+  return String(full).trim().split(/\s+/)[0];
+}
+const initial = n => (String(n).trim()[0] || '?').toUpperCase();
+const AV = ['av-c','av-y','av-p'];
+const avClass = id => AV[[...String(id)].reduce((a,c)=>a+c.charCodeAt(0),0) % 3];
+
+/* ── lookups ── */
+const U = id => DB.users.find(u => u.id === id);
+const me = () => session ? U(session) : null;
+const dispName = u => u ? (u.pname || greetName(u.name)) : 'Unknown';
+const membersOf = mentorId => DB.users.filter(u => u.role==='member' && u.mentorId===mentorId && u.status!=='deactivated');
+const admins = () => DB.users.filter(u => u.role==='admin' && u.status==='active');
+
+/* ── toast / modal / confirm ── */
+let toastTimer;
+function toast(msg, type='ok'){
+  const t = $('#toast'); t.className = 'toast show '+type; t.textContent = (type==='error' ? '⚠️ ' : '') + msg;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+let lastFocus = null;
+const modalOpen = () => !$('#modal').classList.contains('hide');
+function openModal(html){
+  if(!modalOpen()) lastFocus = document.activeElement;
+  $('#modal-content').innerHTML = html;
+  $('#modal').classList.remove('hide');
+  $('#modal-content').scrollTop = 0;
+  setTimeout(() => { const f = $('#modal-content').querySelector('input:not([type=checkbox]),textarea,select'); if(f) f.focus(); }, 40);
+}
+function closeModal(){
+  $('#modal').classList.add('hide'); $('#modal-content').innerHTML = '';
+  if(lastFocus && lastFocus.focus){ try{ lastFocus.focus(); }catch(e){} }
+}
+let confirmCb = null;
+function confirmBox(title, msg, okLabel, cb, danger){
+  confirmCb = cb;
+  openModal(`<h2>${esc(title)}</h2><p class="muted mb">${esc(msg)}</p>
+    <div class="row"><button class="btn ${danger?'btn-danger':'btn-cyan'}" onclick="runConfirm()">${esc(okLabel)}</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`);
+}
+function runConfirm(){ const cb = confirmCb; confirmCb = null; closeModal(); if(cb) cb(); }
+function showErr(id, msg){
+  const e = document.getElementById(id); if(!e) return toast(msg,'error');
+  e.textContent = msg; e.classList.remove('hide','shake'); void e.offsetWidth; e.classList.add('shake'); e.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+const hideErr = id => { const e = document.getElementById(id); if(e) e.classList.add('hide'); };
+
+/* ── button ripple + modal keys ── */
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.btn'); if(!b || b.disabled || reduceMotion()) return;
+  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), sp = document.createElement('span');
+  sp.className = 'ripple'; sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;
+  b.appendChild(sp); setTimeout(() => sp.remove(), 650);
+});
+document.addEventListener('keydown', e => {
+  if(!modalOpen()) return;
+  if(e.key === 'Escape'){ closeModal(); return; }
+  if(e.key === 'Tab'){
+    const f = [...$('#modal').querySelectorAll('button,input,textarea,select,a[href]')].filter(x => !x.disabled && x.offsetParent !== null);
+    if(!f.length) return;
+    const first = f[0], last = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+$('#modal').addEventListener('mousedown', e => { if(e.target === $('#modal')) closeModal(); });
+
+/* ── animations ── */
+function animateCounts(){
+  $$('[data-count]').forEach(el => {
+    const n = +el.dataset.count, suf = el.dataset.suffix || '';
+    if(reduceMotion() || n === 0){ el.textContent = n + suf; return; }
+    const t0 = performance.now(), dur = 700;
+    (function tick(t){ const p = Math.min(1, (t-t0)/dur); el.textContent = Math.round(n*(1-Math.pow(1-p,3))) + suf; if(p<1) requestAnimationFrame(tick); })(t0);
+  });
+}
+function confetti(){
+  if(reduceMotion()) return;
+  const c = $('#confetti'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#7DE8EA','#F7D358','#E98D9B','#111'];
+  const ps = Array.from({length:110}, () => ({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.6,vx:(Math.random()-.5)*16,vy:-Math.random()*17-5,s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let f = 0;
+  (function loop(){
+    x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p => { p.vy += .45; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); x.restore(); });
+    if(++f < 130) requestAnimationFrame(loop); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+/* ── notifications / audit ── */
+function notify(userId, text, kind, key){
+  const u = U(userId); if(!u) return;
+  if(u.prefs && kind && u.prefs[kind] === false) return;
+  if(key){ const ex = DB.notifs.find(n => n.userId===userId && n.key===key && !n.read); if(ex){ ex.ts = nowISO(); ex.text = text; return; } }
+  DB.notifs.push({id:uid(), userId, text, ts:nowISO(), read:false, kind:kind||'', key:key||''});
+}
+function audit(action, detail){
+  const u = me();
+  DB.audit.unshift({id:uid(), ts:nowISO(), action, by:u ? u.name : 'System', detail:detail||''});
+  if(DB.audit.length > 500) DB.audit.length = 500;
+}
+
+/* ── password hashing (browser-side; see notes in the README message) ── */
+async function sha(str, fallback){
+  if(!fallback && window.crypto && crypto.subtle){
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+  let h = 2166136261; for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
+  return 'f' + (h>>>0).toString(16);
+}
+const hashPw = (pw, salt) => sha(salt+':'+pw);
+async function verifyPw(pw, user){ return (await sha(user.salt+':'+pw, user.hash.length < 20)) === user.hash; }
+
+/* ════════ ROUTING ════════ */
+let view = {section:'overview', tabs:{}};
+
+function showPage(id){
+  $$('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-'+id); if(pg) pg.classList.add('active');
+  const loggedIn = !!me();
+  $('#pub-nav').classList.toggle('hide', loggedIn);
+  $('#app-nav').classList.toggle('hide', !loggedIn);
+  $('#mobile-menu').classList.remove('open'); $('#app-mobile-menu').classList.remove('open');
+  if(id==='contact') renderContact();
+  if(id==='privacy') renderPrivacy();
+  if(id==='terms') renderTerms();
+  if(id==='join') { selectedRole = null; $('#role-form-area').innerHTML = ''; $$('.role-card').forEach(c => c.classList.remove('selected')); }
+  if(id==='login'){ hideErr('login-error'); }
+  window.scrollTo(0,0);
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-page]'); if(!a) return;
+  e.preventDefault(); showPage(a.dataset.page);
+});
+function toggleMenu(id){ document.getElementById(id).classList.toggle('open'); }
+
+const NAV = {
+  member:[['overview','🏠','Overview'],['goals','🎯','My Goals'],['progress','📈','Progress'],['checkins','✅','Check-ins'],['journal','📓','My Journal'],['mentor','👤','My Mentor'],['messages','💬','Messages'],['achievements','🏆','Achievements'],['notifications','🔔','Notifications'],['settings','⚙️','Settings']],
+  mentor:[['overview','🏠','Overview'],['members','👥','Assigned Members'],['checkins','✅','Check-ins'],['recommendations','💡','Recommendations'],['messages','💬','Messages'],['followups','📋','Follow-ups'],['notifications','🔔','Notifications'],['settings','⚙️','Settings']],
+  admin:[['overview','🏠','Overview'],['members','👥','Members'],['mentors','🎓','Mentors'],['assignments','🔗','Assignments'],['goals','🎯','Goals & Activity'],['announcements','📢','Announcements'],['inbox','📥','Inbox'],['reports','📊','Reports'],['security','🔒','Access & Security'],['audit','📋','Audit Log'],['platform','🛠️','Platform'],['settings','⚙️','My Settings']]
+};
+
+function unreadMsgs(userId, fromId){ return DB.messages.filter(m => m.toId===userId && !m.read && (!fromId || m.fromId===fromId)).length; }
+const unreadNotifs = userId => DB.notifs.filter(n => n.userId===userId && !n.read).length;
+function badgeCounts(u){
+  const c = {notifications: unreadNotifs(u.id), messages: unreadMsgs(u.id)};
+  if(u.role==='mentor') c.checkins = membersOf(u.id).reduce((a,m) => a + DB.checkins.filter(x => x.userId===m.id && x.status==='submitted').length, 0);
+  if(u.role==='admin'){ c.inbox = DB.contacts.filter(x => !x.read).length; c.members = DB.users.filter(x => x.status==='pending').length; }
+  return c;
+}
+function buildSidebar(){
+  const u = me(); if(!u) return;
+  const cnt = badgeCounts(u);
+  const btn = ([id,ic,label]) => `<li><button class="side-btn ${view.section===id?'active':''}" onclick="go('${id}')"><span class="ic">${ic}</span><span>${label}</span>${cnt[id]?`<span class="count">${cnt[id]}</span>`:''}</button></li>`;
+  $('#sidebar').innerHTML = `<ul>${NAV[u.role].map(btn).join('')}<li class="sidebar-section">Account</li><li><button class="side-btn" onclick="handleLogout()"><span class="ic">↩</span><span>Log out</span></button></li></ul>`;
+  $('#app-mobile-menu').innerHTML = NAV[u.role].map(([id,ic,label]) => `<button onclick="go('${id}')"><span>${ic}</span><span>${label}</span>${cnt[id]?`<span class="count">${cnt[id]}</span>`:''}</button>`).join('')
+    + `<button onclick="handleLogout()" style="color:var(--pink)"><span>↩</span><span>Log out</span></button>`;
+  $('#nav-user').textContent = dispName(u) + ' · ' + u.role;
+}
+function updateBell(){
+  const u = me(); if(!u) return;
+  const n = unreadNotifs(u.id), b = $('#bell-count');
+  b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hide', n===0);
+  $('#bell').classList.toggle('ring', n>0);
+}
+function go(section, extra){
+  view = Object.assign({section, tabs:view.tabs||{}}, extra||{});
+  $('#app-mobile-menu').classList.remove('open');
+  render(); window.scrollTo(0,0);
+}
+let justToggled = null;
+function render(){
+  const u = me();
+  if(!u || u.status !== 'active'){ if(session){ session = null; try{sessionStorage.removeItem(SKEY);}catch(e){} toast('You were signed out because your account is no longer active.','error'); showPage('login'); } return; }
+  if(view.section === 'messages') markThreadRead(u);
+  const fns = VIEWS[u.role], fn = fns[view.section] || fns.overview;
+  const c = $('#app-content');
+  c.innerHTML = fn(u);
+  c.classList.remove('view-enter'); void c.offsetWidth; c.classList.add('view-enter');
+  justToggled = null;
+  buildSidebar(); updateBell(); animateCounts();
+  const th = $('#thread'); if(th) th.scrollTop = th.scrollHeight;
+}
+function goHome(){ view = {section:'overview', tabs:{}}; showPage('app'); render(); }
+
+/* ── shared UI builders ── */
+const chip = (t, cls) => `<span class="chip chip-${cls}">${esc(t)}</span>`;
+const progBar = (p, color) => `<div class="prog-track" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><div class="prog-fill ${color||''}" style="--w:${p}%"></div></div>`;
+const stat = (n, label, cls, suf) => `<div class="stat-card ${cls?'c-'+cls:''}"><div class="stat-num" data-count="${n}" ${suf?`data-suffix="${suf}"`:''}>0</div><div class="stat-label">${esc(label)}</div></div>`;
+const empty = (ic, title, text, btn) => `<div class="empty"><div class="em-ic">${ic}</div><h3>${esc(title)}</h3><p>${esc(text)}</p>${btn||''}</div>`;
+const catChip = c => c==='academic' ? chip('🎓 Academic','cyan') : c==='personal' ? chip('✨ Personal','yellow') : chip('💪 Fitness','pink');
+const catColor = c => c==='fitness' ? 'pink' : c==='personal' ? 'yellow' : '';
+const STATUS_CLS = {'Not started':'grey','In progress':'yellow','On track':'green','Needs attention':'pink','Paused':'grey','Completed':'cyan'};
+const statusChip = s => chip(s, STATUS_CLS[s] || 'grey');
+const pageHead = (t, sub) => `<h1 class="page-title">${t}</h1><p class="page-sub">${sub||''}</p>`;
+function tabsHTML(tid, items){
+  const cur = (view.tabs && view.tabs[tid] && items.find(i => i.id===view.tabs[tid])) ? view.tabs[tid] : items[0].id;
+  return `<div class="tabs" data-tabs="${tid}"><div class="tab-row" role="tablist">${items.map(i => `<button class="tab-btn ${i.id===cur?'active':''}" role="tab" onclick="switchTab(this,'${i.id}')">${i.label}</button>`).join('')}</div>
+    ${items.map(i => `<div class="tab-pane ${i.id===cur?'active':''}" data-pane="${i.id}">${i.html}</div>`).join('')}</div>`;
+}
+function switchTab(btn, paneId){
+  const root = btn.closest('.tabs');
+  root.querySelectorAll(':scope > .tab-row .tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+  root.querySelectorAll(':scope > .tab-pane').forEach(p => p.classList.toggle('active', p.dataset.pane === paneId));
+  view.tabs = view.tabs || {}; view.tabs[root.dataset.tabs] = paneId;
+}
+
+/* ════════ GOALS (shared data logic) ════════ */
+const GOAL_STATUSES = ['Not started','In progress','On track','Needs attention','Paused','Completed'];
+function goalPct(g){
+  if(g.status === 'Completed') return 100;
+  if(g.milestones.length) return Math.round(g.milestones.filter(m => m.done).length / g.milestones.length * 100);
+  return g.pct || 0;
+}
+const goalsOf = userId => DB.goals.filter(g => g.userId === userId);
+const isActiveGoal = g => g.status !== 'Completed' && g.status !== 'Paused';
+function goalSlots(userId, excludeId){
+  const gs = DB.goals.filter(g => g.userId===userId && g.status!=='Completed' && g.id!==excludeId);
+  return {main: gs.filter(g => g.type==='main').length, small: gs.filter(g => g.type==='smaller').length};
+}
+function slotError(userId, type, excludeId){
+  const s = goalSlots(userId, excludeId);
+  if(type==='main' && s.main >= 1) return 'You already have a main goal. Finish it first, or add this one as a smaller goal.';
+  if(type==='smaller' && s.small >= 2) return 'You already have two smaller goals. Finish one first.';
+  return '';
+}
+function applyMilestones(g, lines){
+  const seen = new Set(), old = g.milestones || [];
+  g.milestones = lines.filter(l => { const k = l.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; })
+    .map(t => { const ex = old.find(m => m.title.toLowerCase() === t.toLowerCase()); return ex ? ex : {id:uid(), title:t, done:false}; });
+}
+
+/* ── achievements (computed from real data) ── */
+function maxStreak(weeks){
+  const s = new Set(weeks); let best = 0;
+  weeks.forEach(w => { if(s.has(prevWeek(w))) return; let n = 0, cur = w; while(s.has(cur)){ n++; cur = nextWeek(cur); } best = Math.max(best, n); });
+  return best;
+}
+function nextWeek(w){ const d = parseDate(w); d.setDate(d.getDate()+7); return localDateStr(d); }
+function prevWeek(w){ const d = parseDate(w); d.setDate(d.getDate()-7); return localDateStr(d); }
+function achievementsOf(userId){
+  const u = U(userId), gs = goalsOf(userId), cis = DB.checkins.filter(c => c.userId===userId);
+  return [
+    {icon:'🎯', label:'First goal', desc:'Set your first goal', earned: gs.length>0},
+    {icon:'✅', label:'First check-in', desc:'Submit a weekly check-in', earned: cis.length>0},
+    {icon:'🏔️', label:'First milestone', desc:'Tick off a milestone', earned: gs.some(g => g.milestones.some(m => m.done))},
+    {icon:'📓', label:'First journal entry', desc:'Write a journal entry', earned: DB.journal.some(j => j.userId===userId)},
+    {icon:'🔥', label:'4-week streak', desc:'Check in 4 weeks in a row', earned: maxStreak(cis.map(c => c.week)) >= 4},
+    {icon:'🏆', label:'Goal completed', desc:'Complete a goal', earned: gs.some(g => g.status==='Completed')},
+    {icon:'💬', label:'Mentor connected', desc:'Get paired with a mentor', earned: !!(u && u.mentorId)},
+    {icon:'📅', label:'Monthly reflection', desc:'Write a monthly reflection', earned: DB.reflections.some(r => r.userId===userId)}
+  ];
+}
+function withAchievements(userId, fn){
+  const before = new Set(achievementsOf(userId).filter(a => a.earned).map(a => a.label));
+  fn();
+  achievementsOf(userId).filter(a => a.earned && !before.has(a.label)).forEach(a => {
+    notify(userId, `Achievement unlocked: ${a.label} ${a.icon}`, 'achievements');
+    if(me() && me().id === userId) toast(`Achievement unlocked: ${a.label} ${a.icon}`);
+  });
+}
+
+/* ── messaging (shared) ── */
+function markThreadRead(u){
+  const peer = u.role==='member' ? u.mentorId : view.peer; if(!peer) return;
+  let ch = false; DB.messages.forEach(m => { if(m.toId===u.id && m.fromId===peer && !m.read){ m.read = true; ch = true; } });
+  if(ch) save();
+}
+function threadHTML(u, peerId){
+  const peer = U(peerId); if(!peer) return '';
+  const msgs = DB.messages.filter(m => (m.fromId===u.id && m.toId===peerId) || (m.fromId===peerId && m.toId===u.id)).sort((a,b) => a.ts < b.ts ? -1 : 1);
+  return `<div class="card" style="display:flex;flex-direction:column">
+    <div class="row" style="padding-bottom:14px;border-bottom:2px solid var(--border);margin-bottom:14px">
+      <div class="avatar ${avClass(peer.id)}">${esc(initial(peer.name))}</div>
+      <div><div style="font-weight:700">${esc(peer.name)}</div><div class="small muted">${peer.role==='mentor'?'Your mentor':'Member'} · private conversation</div></div>
+    </div>
+    <div class="msg-wrap" id="thread">${msgs.length ? msgs.map(m => `<div><div class="msg-bubble ${m.fromId===u.id?'msg-mine':'msg-theirs'}">${esc(m.text)}</div><div class="msg-time">${fmtDT(m.ts)}</div></div>`).join('') : `<p class="muted" style="margin:auto;text-align:center">No messages yet. Say hello 👋</p>`}</div>
+    <div class="msg-input-row"><input type="text" id="msg-input" maxlength="2000" placeholder="Type a message…" aria-label="Message" onkeydown="if(event.key==='Enter')sendMsg('${peerId}')"><button class="btn btn-cyan btn-sm" onclick="sendMsg('${peerId}')">Send</button></div>
+  </div>`;
+}
+function sendMsg(peerId){
+  const inp = $('#msg-input'), t = inp ? inp.value.trim() : ''; if(!t) return;
+  const u = me(); if(!U(peerId)) return;
+  DB.messages.push({id:uid(), fromId:u.id, toId:peerId, text:t, ts:nowISO(), read:false});
+  notify(peerId, `New message from ${u.name}`, 'messages', 'msg:'+u.id);
+  save(); render(); const i = $('#msg-input'); if(i) i.focus();
+}
+/* ════════ PUBLIC PAGES (dynamic bits) ════════ */
+function siteFooter(){
+  const S = DB.settings;
+  return `<footer><div class="wrap"><div class="footer-inner">
+    <div><div class="logo-text">${esc(S.platformName)}</div><div class="muted small" style="margin-top:4px">Stay focused · Stay fearnot</div></div>
+    <nav><a href="#" data-page="about">About</a><a href="#" data-page="how-it-works">How it works</a><a href="#" data-page="contact">Contact</a><a href="#" data-page="privacy">Privacy Policy</a><a href="#" data-page="terms">Terms of Use</a></nav>
+    <p class="footer-note">© ${new Date().getFullYear()} ${esc(S.platformName)}. This platform is for FOCUS club members only.</p>
+  </div></div></footer>`;
+}
+const contactRef = () => DB.settings.contactEmail ? `<strong>${esc(DB.settings.contactEmail)}</strong>` : 'the FOCUS administrators via the <a href="#" data-page="contact" style="text-decoration:underline">Contact page</a>';
+
+function renderContact(){
+  const em = DB.settings.contactEmail;
+  $('#contact-body').innerHTML = `
+    <h1>Contact FOCUS</h1>
+    <p style="margin-bottom:28px">Have a question, a concern, or want to get involved? Send us a message.</p>
+    ${em ? `<div class="card mb"><h3 style="margin-bottom:10px">Email</h3><p>You can also email us directly at <strong>${esc(em)}</strong>.</p></div>` : ''}
+    <div class="card card-cyan mb"><h3 style="margin-bottom:10px">Become a mentor</h3><p>Interested in mentoring FOCUS members? Ask the administrators for a mentor access code, then register from the Join page.</p></div>
+    <div class="card card-yellow"><h3 style="margin-bottom:10px">Report a concern</h3><p>If you have a safeguarding concern or need to report inappropriate conduct, use the form below and mark it as a concern. All reports go straight to the FOCUS administrators.</p></div>
+    <h2>Send a message</h2>
+    <div id="ct-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="ct-name">Your name</label><input id="ct-name" type="text" autocomplete="name"></div>
+    <div class="field"><label for="ct-email">Email address</label><input id="ct-email" type="email" autocomplete="email"></div>
+    <div class="field"><label for="ct-type">What is this about?</label><select id="ct-type"><option>General question</option><option>Becoming a mentor</option><option>Report a concern</option><option>Something else</option></select></div>
+    <div class="field"><label for="ct-msg">Message</label><textarea id="ct-msg" placeholder="How can we help?"></textarea></div>
+    <button class="btn" onclick="sendContact()">Send message</button>`;
+}
+function sendContact(){
+  const name = val('ct-name'), email = val('ct-email'), msg = val('ct-msg');
+  if(!name) return showErr('ct-err','Please enter your name.');
+  if(!/^\S+@\S+\.\S+$/.test(email)) return showErr('ct-err','Please enter a valid email address so we can reply.');
+  if(msg.length < 5) return showErr('ct-err','Please write a message.');
+  DB.contacts.unshift({id:uid(), name, email, type:$('#ct-type').value, message:msg, ts:nowISO(), read:false});
+  admins().forEach(a => notify(a.id, `New contact message from ${name}`, '', 'contact'));
+  save(); renderContact(); toast('Message sent — the FOCUS team will get back to you.');
+}
+function renderPrivacy(){
+  $('#privacy-body').innerHTML = `
+    <h1>Privacy Policy</h1><p style="margin-bottom:28px">Last updated: October 2026</p>
+    <h2>What we collect</h2><p>We collect your name, email address, and the content you create on the platform — goals, progress updates, check-ins, journal entries, and messages. We collect only what is needed to run the FOCUS mentorship programme.</p>
+    <h2>How we use it</h2><p>Your information is used to operate your account, connect you with a mentor, and provide progress tracking. We do not sell your data or use it for advertising.</p>
+    <h2>Who can see what</h2>
+    <ul>
+      <li><strong>Your goals, milestones, and progress updates</strong> are visible to you and your assigned mentor.</li>
+      <li><strong>Your check-in responses</strong> are visible to you and your assigned mentor.</li>
+      <li><strong>Your journal entries</strong> are private by default. You choose, entry by entry, whether to share with your mentor.</li>
+      <li><strong>Your monthly reflections</strong> are private to you.</li>
+      <li><strong>Your messages</strong> are between you and your mentor.</li>
+      <li><strong>Administrators</strong> can see account-level information and aggregated activity. The platform does not show them journal entries or private messages.</li>
+    </ul>
+    <h2>Where data is stored</h2><p>Data is stored in the browser that FOCUS is used in. Anyone with access to that browser profile and device could access it, so please log out on shared devices.</p>
+    <h2>Your rights</h2><p>You can request access to, correction of, or deletion of your personal data at any time by contacting ${contactRef()}.</p>
+    <h2>Questions</h2><p>Contact ${contactRef()} with any privacy questions.</p>`;
+}
+function renderTerms(){
+  $('#terms-body').innerHTML = `
+    <h1>Terms of Use</h1><p style="margin-bottom:28px">Last updated: October 2026</p>
+    <h2>Acceptance</h2><p>By registering for FOCUS, you agree to these terms. If you do not agree, please do not register.</p>
+    <h2>Eligibility</h2><p>FOCUS is for members of the FOCUS club. Registration is subject to the club's membership rules.</p>
+    <h2>Your account</h2><p>You are responsible for keeping your account secure. Do not share your password. You may not share your account or create multiple accounts for the same person.</p>
+    <h2>Acceptable use</h2><p>Use FOCUS to set and pursue your goals, communicate constructively with your mentor, and engage honestly with the check-in and progress system. Do not use the platform to harass, abuse, or harm others.</p>
+    <h2>Content</h2><p>You own the content you create on FOCUS, including your goals and journal entries. By using the platform, you allow FOCUS to store it and show it to you and your authorized mentor as described in the Privacy Policy.</p>
+    <h2>Account suspension</h2><p>FOCUS administrators may suspend or deactivate accounts that violate these terms or the club's code of conduct.</p>
+    <h2>Changes</h2><p>We may update these terms. Continued use of the platform after an update means you accept the new terms.</p>
+    <h2>Contact</h2><p>${contactRef()}</p>`;
+}
+
+/* ════════ REGISTER ════════ */
+let selectedRole = null;
+function selectRole(role){
+  selectedRole = role;
+  $$('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === role));
+  renderRegForm(role);
+  setTimeout(() => $('#role-form-area').scrollIntoView({behavior:'smooth', block:'start'}), 60);
+}
+function renderRegForm(role){
+  const S = DB.settings;
+  let extra = '', note = '';
+  if(role==='member' && !S.allowRegistration) note = `<div class="form-error">New member registration is currently closed. Please contact the FOCUS administrators.</div>`;
+  if(role==='mentor'){
+    if(!S.mentorCode) note = `<div class="form-error">Mentor registration isn't open yet — a platform admin needs to set up a mentor access code first.</div>`;
+    else extra = `<div class="field"><label for="reg-code">Mentor access code</label><input type="password" id="reg-code" autocomplete="off"><div class="hint">Ask the FOCUS administrators for this code.</div></div>`;
+  }
+  if(role==='admin'){
+    if(!S.adminCode) extra = `<div class="notice"><strong>First-time setup.</strong> No admin exists yet, so you're creating the platform. Choose two access codes — you'll give the mentor code to mentors and keep the admin code for other admins. You can rotate them later.</div>
+      <div class="field"><label for="reg-newadmin">Choose an admin access code</label><input type="text" id="reg-newadmin" autocomplete="off" placeholder="At least 6 characters"></div>
+      <div class="field"><label for="reg-newmentor">Choose a mentor access code</label><input type="text" id="reg-newmentor" autocomplete="off" placeholder="At least 6 characters"></div>`;
+    else extra = `<div class="field"><label for="reg-code">Admin access code</label><input type="password" id="reg-code" autocomplete="off"><div class="hint">Ask an existing FOCUS admin for this code.</div></div>`;
+  }
+  const blocked = (role==='member' && !S.allowRegistration) || (role==='mentor' && !S.mentorCode);
+  $('#role-form-area').innerHTML = `<div class="card">
+    <h3 style="margin-bottom:18px">Create your ${role} account</h3>${note}
+    ${blocked ? '' : `<div id="reg-error" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="reg-name">Full name</label><input id="reg-name" type="text" autocomplete="name"></div>
+    <div class="field"><label for="reg-email">Email address</label><input id="reg-email" type="email" autocomplete="email"></div>
+    <div class="field"><label for="reg-pw">Password</label><input id="reg-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+    <div class="field"><label for="reg-pw2">Confirm password</label><input id="reg-pw2" type="password" autocomplete="new-password"></div>
+    ${extra}
+    <label class="check"><input type="checkbox" id="reg-terms"><span>I agree to the <a href="#" data-page="terms" style="font-weight:700;text-decoration:underline">Terms of Use</a> and <a href="#" data-page="privacy" style="font-weight:700;text-decoration:underline">Privacy Policy</a>.</span></label>
+    <button class="btn btn-full mt" id="reg-btn" onclick="handleRegister('${role}')">Create account</button>`}
+    <p class="muted small" style="text-align:center;margin-top:12px">Already have an account? <a href="#" data-page="login" style="font-weight:700;color:var(--ink);text-decoration:underline">Log in</a></p>
+  </div>`;
+}
+function setBusy(id, on){ const b = document.getElementById(id); if(b){ b.classList.toggle('busy', on); b.disabled = on; } }
+
+async function handleRegister(role){
+  const S = DB.settings;
+  const name = val('reg-name'), email = val('reg-email').toLowerCase(), pw = $('#reg-pw').value, pw2 = $('#reg-pw2').value;
+  const E = m => showErr('reg-error', m);
+  hideErr('reg-error');
+  if(!name) return E('Please enter your full name.');
+  if(!/^\S+@\S+\.\S+$/.test(email)) return E('Please enter a valid email address.');
+  if(DB.users.some(u => u.email === email)) return E('An account with that email already exists. Try logging in.');
+  if(pw.length < 8) return E('Password must be at least 8 characters.');
+  if(pw !== pw2) return E('Passwords do not match.');
+  if(!$('#reg-terms').checked) return E('Please accept the Terms of Use and Privacy Policy.');
+  let setup = null;
+  if(role==='member' && !S.allowRegistration) return E('New member registration is currently closed.');
+  if(role==='mentor'){ if(!S.mentorCode) return E('Mentor registration is not open yet.'); if($('#reg-code').value.trim() !== S.mentorCode) return E('That mentor access code is not correct.'); }
+  if(role==='admin'){
+    if(!S.adminCode){
+      const a = val('reg-newadmin'), m = val('reg-newmentor');
+      if(a.length < 6 || m.length < 6) return E('Both access codes need at least 6 characters.');
+      if(a === m) return E('The admin and mentor codes must be different.');
+      setup = {a, m};
+    } else if($('#reg-code').value.trim() !== S.adminCode) return E('That admin access code is not correct.');
+  }
+  setBusy('reg-btn', true);
+  try{
+    const salt = uid(), hash = await hashPw(pw, salt);
+    const pending = role==='member' && S.requireApproval;
+    const user = {id:uid(), name, email, role, salt, hash, status: pending ? 'pending' : 'active', bio:'', pname:'', checkinDay:'Sunday', prefs:{}, joined:nowISO(), mentorId:'', onboarded: role!=='member'};
+    DB.users.push(user);
+    if(setup){ S.adminCode = setup.a; S.mentorCode = setup.m; }
+    session = user.id;               // so the audit trail names the new user
+    if(setup) audit('Platform set up', `${name} created the platform and set the access codes`);
+    audit('New '+role+' registered', name);
+    session = null;
+    if(role==='member') admins().forEach(a => notify(a.id, pending ? `${name} is waiting for account approval` : `${name} joined as a new member`, '', 'newmember'));
+    save();
+    if(pending){ showPage('login'); toast('Account created. An admin needs to approve it before you can log in.'); }
+    else loginAs(user);
+  } finally { setBusy('reg-btn', false); }
+}
+
+/* ════════ LOGIN / LOGOUT ════════ */
+async function handleLogin(){
+  const email = val('li-email').toLowerCase(), pw = $('#li-pw').value;
+  hideErr('login-error');
+  if(!email || !pw) return showErr('login-error','Please enter your email and password.');
+  setBusy('login-btn', true);
+  try{
+    const u = DB.users.find(x => x.email === email);
+    if(!u || !(await verifyPw(pw, u))) return showErr('login-error','Incorrect email or password.');
+    if(u.status==='pending') return showErr('login-error','Your account is still waiting for admin approval.');
+    if(u.status==='suspended') return showErr('login-error','This account has been suspended. Please contact the FOCUS administrators.');
+    if(u.status==='deactivated') return showErr('login-error','This account has been deactivated.');
+    $('#li-pw').value = '';
+    loginAs(u);
+  } finally { setBusy('login-btn', false); }
+}
+function loginAs(user){
+  session = user.id;
+  try{ sessionStorage.setItem(SKEY, user.id); }catch(e){}
+  view = {section:'overview', tabs:{}};
+  if(user.role==='member' && !user.onboarded){ startOnboarding(); }
+  else { showPage('app'); render(); }
+  toast(`Welcome, ${greetName(user.name)}!`);
+}
+function handleLogout(){
+  session = null; try{ sessionStorage.removeItem(SKEY); }catch(e){}
+  closeModal(); showPage('home'); toast("You've been logged out.");
+}
+
+/* ════════ ONBOARDING (members) ════════ */
+let onb = {step:0, mainId:'', s1:'', s2:''};
+function startOnboarding(){ onb = {step:0, mainId:'', s1:'', s2:''}; showPage('onboarding'); renderOnboarding(); }
+function finishOnboarding(){ const u = me(); u.onboarded = true; save(); goHome(); toast('All set — welcome to FOCUS!'); }
+
+function goalFields(p, g, withType){
+  g = g || {};
+  const lines = (g.milestones || []).map(m => m.title).join('\n');
+  return `<div class="field"><label for="${p}title">Goal title</label><input id="${p}title" type="text" maxlength="120" value="${esc(g.title||'')}" placeholder="What do you want to achieve?"></div>
+    <div class="field"><label for="${p}cat">Category</label><select id="${p}cat"><option value="academic" ${g.cat==='academic'?'selected':''}>🎓 Academic</option><option value="personal" ${g.cat==='personal'?'selected':''}>✨ Personal</option><option value="fitness" ${g.cat==='fitness'?'selected':''}>💪 Fitness</option></select></div>
+    ${withType ? `<div class="field"><label for="${p}type">Goal type</label><select id="${p}type"><option value="main" ${g.type==='main'?'selected':''}>Main goal (one at a time)</option><option value="smaller" ${g.type==='smaller'?'selected':''}>Smaller goal (up to two)</option></select></div>` : ''}
+    <div class="field"><label for="${p}success">What does success look like?</label><textarea id="${p}success">${esc(g.success||'')}</textarea></div>
+    <div class="field"><label for="${p}why">Why does this matter to you?</label><textarea id="${p}why">${esc(g.why||'')}</textarea></div>
+    <div class="field"><label for="${p}obs">Obstacles you expect</label><textarea id="${p}obs">${esc(g.obstacles||'')}</textarea></div>
+    <div class="field"><label for="${p}ms">Milestones</label><textarea id="${p}ms" placeholder="One per line">${esc(lines)}</textarea><div class="hint">One per line. Ticking them off is how your progress bar moves.</div></div>
+    <div class="field"><label for="${p}date">Target date</label><input type="date" id="${p}date" value="${esc(g.deadline||'')}"></div>`;
+}
+const readGoalFields = p => ({
+  title: val(p+'title'), cat: $('#'+p+'cat').value, success: val(p+'success'), why: val(p+'why'), obstacles: val(p+'obs'),
+  deadline: $('#'+p+'date').value, lines: val(p+'ms').split('\n').map(s => s.trim()).filter(Boolean)
+});
+function writeGoal(g, d){
+  g.title = d.title; g.cat = d.cat; g.success = d.success; g.why = d.why; g.obstacles = d.obstacles; g.deadline = d.deadline;
+  applyMilestones(g, d.lines);
+}
+function createGoal(userId, d, type){
+  const g = {id:uid(), userId, type, status:'Not started', pct:0, created:nowISO(), completedAt:'', milestones:[]};
+  writeGoal(g, d); DB.goals.push(g); return g;
+}
+
+function renderOnboarding(){
+  const u = me(), c = $('#onboarding-content'), step = onb.step;
+  const nav = (back, next, nextLabel, skip) => `<div class="row mt">${next ? `<button class="btn" onclick="${next}">${nextLabel}</button>` : ''}${skip ? `<button class="btn btn-ghost" onclick="${skip}">Skip</button>` : ''}${back ? `<button class="btn btn-ghost" onclick="${back}">← Back</button>` : ''}</div>`;
+  if(step === 0){
+    c.innerHTML = `<div class="alert alert-cyan">Step 1 of 4 — Welcome</div>
+      <h1 style="font-size:clamp(28px,5vw,40px);margin-bottom:12px">Welcome, ${esc(greetName(u.name))}! 👋</h1>
+      <p class="muted mb" style="font-size:17px">FOCUS is your space to work towards the things that matter to you. Let's get you set up.</p>
+      <div class="card card-cyan"><h3 style="margin-bottom:8px">Here's what you'll do next</h3><ul style="padding-left:18px;line-height:2;font-size:15px"><li>Review your profile</li><li>Set your goals (or skip for now)</li><li>Get paired with a mentor by an admin</li></ul></div>
+      <div class="row mt"><button class="btn" onclick="onb.step=1;renderOnboarding()">Let's go</button><button class="btn btn-ghost" onclick="finishOnboarding()">Skip to dashboard</button></div>`;
+  } else if(step === 1){
+    c.innerHTML = `<div class="alert alert-yellow">Step 2 of 4 — Your profile</div>
+      <h2 class="mb">Tell us a little about yourself</h2>
+      <div class="field"><label for="ob-pname">Preferred name</label><input type="text" id="ob-pname" value="${esc(u.pname||greetName(u.name))}"></div>
+      <div class="field"><label for="ob-bio">Short bio (optional)</label><textarea id="ob-bio">${esc(u.bio||'')}</textarea></div>
+      <div class="field"><label for="ob-day">Preferred check-in day</label><select id="ob-day">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d => `<option ${u.checkinDay===d?'selected':''}>${d}</option>`).join('')}</select></div>
+      ${nav('onb.step=0;renderOnboarding()', 'saveOnbProfile()', 'Continue', 'onb.step=2;renderOnboarding()')}`;
+  } else if(step === 2){
+    const g = onb.mainId ? DB.goals.find(x => x.id === onb.mainId) : null;
+    c.innerHTML = `<div class="alert alert-pink">Step 3 of 4 — Your main goal</div>
+      <h2 style="margin-bottom:8px">Set your main goal</h2>
+      <p class="muted mb">The one thing you most want to achieve. You can edit it any time.</p>
+      <div id="ob-err" class="form-error hide" role="alert"></div>
+      ${goalFields('ob-', g, false)}
+      ${nav('onb.step=1;renderOnboarding()', 'saveOnbMain()', 'Save goal', 'onb.step=3;renderOnboarding()')}`;
+  } else {
+    const row = (n, id) => { const g = id ? DB.goals.find(x => x.id === id) : null; return `<div class="card mb"><h4 style="margin-bottom:12px">Smaller goal ${n}</h4>
+      <div class="field"><label for="ob-s${n}-title">Title</label><input id="ob-s${n}-title" type="text" maxlength="120" value="${esc(g?g.title:'')}"></div>
+      <div class="field"><label for="ob-s${n}-cat">Category</label><select id="ob-s${n}-cat"><option value="academic" ${g&&g.cat==='academic'?'selected':''}>🎓 Academic</option><option value="personal" ${g&&g.cat==='personal'?'selected':''}>✨ Personal</option><option value="fitness" ${g&&g.cat==='fitness'?'selected':''}>💪 Fitness</option></select></div>
+      <div class="field"><label for="ob-s${n}-date">Target date</label><input type="date" id="ob-s${n}-date" value="${esc(g?g.deadline:'')}"></div></div>`; };
+    c.innerHTML = `<div class="alert alert-cyan">Step 4 of 4 — Smaller goals (optional)</div>
+      <h2 style="margin-bottom:8px">Add up to two smaller goals</h2>
+      <p class="muted mb">These can support your main goal or be separate objectives. You can add milestones later.</p>
+      ${row(1, onb.s1)}${row(2, onb.s2)}
+      ${nav('onb.step=2;renderOnboarding()', 'saveOnbSmall()', 'Finish & go to dashboard', 'finishOnboarding()')}`;
+  }
+}
+function saveOnbProfile(){
+  const u = me(); u.pname = val('ob-pname'); u.bio = val('ob-bio'); u.checkinDay = $('#ob-day').value;
+  save(); onb.step = 2; renderOnboarding();
+}
+function saveOnbMain(){
+  const d = readGoalFields('ob-'), u = me();
+  if(!d.title) return showErr('ob-err','Give your goal a title, or press Skip.');
+  withAchievements(u.id, () => {
+    if(onb.mainId){ writeGoal(DB.goals.find(x => x.id === onb.mainId), d); }
+    else onb.mainId = createGoal(u.id, d, 'main').id;
+  });
+  save(); onb.step = 3; renderOnboarding();
+}
+function saveOnbSmall(){
+  const u = me();
+  withAchievements(u.id, () => [1,2].forEach(n => {
+    const t = val(`ob-s${n}-title`); if(!t) return;
+    const d = {title:t, cat:$(`#ob-s${n}-cat`).value, deadline:$(`#ob-s${n}-date`).value, success:'', why:'', obstacles:'', lines:[]};
+    const key = 's'+n;
+    if(onb[key]){ const g = DB.goals.find(x => x.id === onb[key]); d.success = g.success; d.why = g.why; d.obstacles = g.obstacles; d.lines = g.milestones.map(m => m.title); writeGoal(g, d); }
+    else onb[key] = createGoal(u.id, d, 'smaller').id;
+  }));
+  save(); finishOnboarding();
+}
+const VIEWS = {member:{}, mentor:{}, admin:{}};
+
+/* ── shared blocks ── */
+function annBlock(role){
+  const aud = role==='member' ? 'members' : role==='mentor' ? 'mentors' : 'admins';
+  const list = DB.announcements.filter(a => a.audience==='all' || a.audience===aud).slice(0,3);
+  return list.map(a => `<div class="alert alert-cyan">📢 <div><strong>${esc(a.title)}</strong>${a.body?`<div style="font-weight:400;margin-top:2px">${esc(a.body)}</div>`:''}<div class="small" style="font-weight:400;opacity:.75">${fmtDate(a.ts.slice(0,10))}</div></div></div>`).join('');
+}
+const CI_QS = [
+  ['What progress did you make this week?','Describe what you worked on and what you achieved…'],
+  ['What went well?','What helped you make progress?'],
+  ['What challenged you?','What made things difficult or slowed you down?'],
+  ['What is your next step?','What will you focus on next week?'],
+  ['Do you need help from your mentor? (optional)','Any questions or areas where you want guidance?']
+];
+const checkinAnswers = c => CI_QS.map((q,i) => c.answers[i] ? `<div class="answer"><b>${i+1}. ${esc(q[0].replace(' (optional)',''))}</b>${esc(c.answers[i])}</div>` : '').join('');
+const deadlineText = g => {
+  if(!g.deadline) return '<span class="meta">No target date</span>';
+  const d = daysUntil(g.deadline);
+  const tail = g.status==='Completed' ? '' : d<0 ? ` · <b class="late">${-d} day${-d===1?'':'s'} overdue</b>` : d===0 ? ' · <b>due today</b>' : ` · ${d} day${d===1?'':'s'} left`;
+  return `<span class="meta">Target: ${fmtDate(g.deadline)}${tail}</span>`;
+};
+
+/* ════════ GOAL CARD ════════ */
+function goalCard(g, own){
+  const p = goalPct(g);
+  const ms = g.milestones.length ? `<ul class="ms-list">${g.milestones.map(m => `<li><button class="ms ${m.done?'done':''} ${justToggled===m.id?'just':''}" ${own?`onclick="toggleMilestone('${g.id}','${m.id}')"`:'disabled'} aria-pressed="${m.done}"><span class="ms-box">${m.done?'✓':''}</span><span class="ms-t">${esc(m.title)}</span></button></li>`).join('')}</ul>` : '';
+  const act = !own ? '' : `<div class="goal-actions">
+      ${g.status==='Completed' ? `<button class="btn btn-sm btn-ghost" onclick="openGoal('${g.id}')">Edit / reopen</button>` : `
+      <button class="btn btn-sm btn-cyan" onclick="openUpdateGoal('${g.id}')">Update progress</button>
+      <button class="btn btn-sm btn-ghost" onclick="openGoal('${g.id}')">Edit</button>
+      ${g.status==='Paused' ? `<button class="btn btn-sm btn-ghost" onclick="resumeGoal('${g.id}')">Resume</button>` : `<button class="btn btn-sm btn-ghost" onclick="pauseGoal('${g.id}')">Pause</button>`}
+      <button class="btn btn-sm btn-ok" onclick="completeGoal('${g.id}')">Mark complete</button>`}
+      <button class="btn btn-sm btn-danger" onclick="deleteGoal('${g.id}')">Delete</button></div>`;
+  return `<div class="goal-card">
+    <div class="spread"><div class="row">${catChip(g.cat)} ${statusChip(g.status)} ${chip(g.type==='main'?'Main goal':'Smaller goal','grey')}</div>${deadlineText(g)}</div>
+    <h3>${esc(g.title)}</h3>
+    ${g.success ? `<p class="meta" style="margin-bottom:6px">🏁 ${esc(g.success)}</p>` : ''}
+    <div style="margin:10px 0 4px">${progBar(p, catColor(g.cat))}</div><p class="meta">${p}% complete${g.milestones.length?` · ${g.milestones.filter(m=>m.done).length}/${g.milestones.length} milestones`:''}</p>
+    ${ms}${act}</div>`;
+}
+const noGoalsEmpty = () => empty('🎯','No goals yet','Set your first goal — one main goal and up to two smaller ones. It only takes a minute.','<button class="btn btn-cyan" onclick="openGoal()">+ Set your first goal</button>');
+
+/* ════════ MEMBER VIEWS ════════ */
+VIEWS.member.overview = u => {
+  const gs = goalsOf(u.id), cis = DB.checkins.filter(c => c.userId===u.id);
+  const mentor = u.mentorId ? U(u.mentorId) : null;
+  const day = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const cur = cis.find(c => c.week===thisWeek());
+  const fbC = cis.filter(c => c.status==='reviewed' && c.feedback).sort((a,b) => a.reviewedAt<b.reviewedAt?1:-1)[0];
+  const main = gs.filter(g => g.type==='main' && g.status!=='Completed'), small = gs.filter(g => g.type==='smaller' && g.status!=='Completed');
+  const checkAlert = !DB.settings.checkinsRequired ? '' : cur
+    ? `<div class="alert alert-cyan">✅ This week's check-in is in${cur.status==='reviewed'?' and has been reviewed':''}. <button class="btn btn-sm btn-ghost" onclick="go('checkins')">View</button></div>`
+    : `<div class="alert alert-yellow">⏰ Your weekly check-in for ${weekLabel(thisWeek())} isn't in yet. <button class="btn btn-sm btn-pulse" onclick="go('checkins')">Start check-in</button></div>`;
+  return `<p class="eyebrow">${day}</p>${pageHead(`${timeGreeting()}, ${esc(dispName(u))}.`, 'Small steps. Consistent progress.')}
+    <div class="stat-row">${stat(gs.filter(isActiveGoal).length,'Active goals','cyan')}${stat(cis.length,'Check-ins done')}${stat(gs.reduce((a,g)=>a+g.milestones.filter(m=>m.done).length,0),'Milestones hit','yellow')}${stat(gs.filter(g=>g.status==='Completed').length,'Goals completed','pink')}</div>
+    ${annBlock('member')}${checkAlert}
+    <h3 class="sec" style="margin-top:0">Your main goal</h3>
+    ${main.length ? main.map(g => goalCard(g,true)).join('') : (gs.length ? empty('🎯','No active main goal','Add a main goal, or reopen a finished one.','<button class="btn btn-cyan btn-sm" onclick="openGoal()">+ Add goal</button>') : noGoalsEmpty())}
+    ${small.length ? `<h3 class="sec">Smaller goals</h3>${small.map(g => goalCard(g,true)).join('')}` : ''}
+    <h3 class="sec">Your mentor</h3>
+    ${mentor ? `<div class="card"><div class="row"><div class="avatar ${avClass(mentor.id)}" style="width:52px;height:52px;font-size:20px">${esc(initial(mentor.name))}</div><div><div style="font-weight:700;font-size:16px">${esc(mentor.name)}</div><div class="muted small">Your assigned mentor</div></div><button class="btn btn-sm btn-cyan" style="margin-left:auto" onclick="go('messages')">Message mentor</button></div>
+      <div class="card-flat" style="margin-top:14px;padding:12px;background:var(--faint);border-radius:8px;border:2px solid var(--border)"><div class="small muted" style="font-weight:700;margin-bottom:4px">Latest feedback</div><p style="font-size:14px">${fbC ? esc(fbC.feedback) : 'No feedback yet — it will show up here after your mentor reviews a check-in.'}</p></div></div>`
+    : empty('👤','No mentor assigned yet',"An admin will pair you with a mentor. You'll get a notification when it happens.")}`;
+};
+
+VIEWS.member.goals = u => {
+  const f = view.filter || 'all';
+  const gs = goalsOf(u.id).sort((a,b) => (a.status==='Completed') - (b.status==='Completed') || (a.type==='main' ? -1 : 1)).filter(g => f==='all' || g.cat===f);
+  const pill = (id,l) => `<button class="pill ${f===id?'active':''}" onclick="view.filter='${id}';render()">${l}</button>`;
+  return `${pageHead('My Goals','All your active and past goals.')}
+    <div class="row mb"><button class="btn btn-cyan" onclick="openGoal()">+ Add goal</button></div>
+    <div class="pill-row">${pill('all','All')}${pill('academic','🎓 Academic')}${pill('personal','✨ Personal')}${pill('fitness','💪 Fitness')}</div>
+    <div class="stagger">${gs.length ? gs.map(g => goalCard(g,true)).join('') : (goalsOf(u.id).length ? empty('🔍','Nothing in this category','You have no goals in this category yet.') : noGoalsEmpty())}</div>`;
+};
+
+VIEWS.member.progress = u => {
+  const gs = goalsOf(u.id), ups = DB.updates.filter(x => x.userId===u.id);
+  return `${pageHead('Progress','Your progress history across all goals.')}
+    <div class="stat-row">${stat(gs.reduce((a,g)=>a+g.milestones.filter(m=>m.done).length,0),'Milestones completed','cyan')}${stat(ups.length,'Progress updates','yellow')}${stat(gs.filter(isActiveGoal).length,'Goals in progress','pink')}</div>
+    <div class="stagger">${gs.length ? gs.map(g => {
+      const mine = ups.filter(x => x.goalId===g.id).sort((a,b) => a.ts<b.ts?1:-1);
+      return `<div class="card mb"><div class="spread mb"><div><h3 style="margin-bottom:6px">${esc(g.title)}</h3>${catChip(g.cat)} ${statusChip(g.status)}</div><span style="font-size:26px;font-weight:900">${goalPct(g)}%</span></div>${progBar(goalPct(g), catColor(g.cat))}
+        <div style="margin-top:14px"><div class="small muted" style="font-weight:700;margin-bottom:8px">Updates (${mine.length})</div>
+        ${mine.length ? mine.slice(0,4).map(x => `<div style="font-size:14px;margin-bottom:10px"><b>${fmtDate(x.date)}</b> — ${esc(x.did)}${x.hard?`<div class="muted small">Difficult: ${esc(x.hard)}</div>`:''}${x.next?`<div class="muted small">Next: ${esc(x.next)}</div>`:''}</div>`).join('') + (mine.length>4?`<p class="muted small">+ ${mine.length-4} older update${mine.length-4===1?'':'s'}</p>`:'') : '<p class="muted small">No updates yet.</p>'}</div>
+        ${g.status!=='Completed' ? `<button class="btn btn-sm btn-cyan" style="margin-top:6px" onclick="openUpdateGoal('${g.id}')">Add update</button>` : ''}</div>`;
+    }).join('') : noGoalsEmpty()}</div>`;
+};
+
+VIEWS.member.checkins = u => {
+  const ws = thisWeek(), cur = DB.checkins.find(c => c.userId===u.id && c.week===ws);
+  const draft = DB.drafts[u.id+'|'+ws] || [];
+  const mine = DB.checkins.filter(c => c.userId===u.id).sort((a,b) => a.week<b.week?1:-1);
+  let weekHTML;
+  if(cur && cur.status==='reviewed'){
+    weekHTML = `<div class="card"><div class="spread mb"><h3>Check-in — ${weekLabel(ws)}</h3>${chip('Reviewed','cyan')}</div>${checkinAnswers(cur)}${cur.feedback?`<div class="fb-box"><b>Mentor feedback</b>${esc(cur.feedback)}</div>`:''}</div>`;
+  } else {
+    const a = cur ? cur.answers : draft;
+    weekHTML = `<div class="card"><h3 style="margin-bottom:6px">Weekly check-in — ${weekLabel(ws)}</h3>
+      <p class="muted small mb">${u.mentorId ? 'Your mentor will see this.' : "You don't have a mentor yet — this is saved and your mentor will see it once you're paired."}${u.checkinDay?` Your preferred check-in day is ${esc(u.checkinDay)}.`:''}</p>
+      ${cur ? `<div class="notice">Submitted ${fmtDT(cur.submittedAt)}. You can still edit it until your mentor reviews it.</div>` : ''}
+      <div id="ci-err" class="form-error hide" role="alert"></div>
+      ${CI_QS.map((q,i) => `<div class="field"><label for="ci-q${i+1}">${i+1}. ${esc(q[0])}</label><textarea id="ci-q${i+1}" placeholder="${esc(q[1])}">${esc(a[i]||'')}</textarea></div>`).join('')}
+      <div class="row"><button class="btn btn-cyan" onclick="submitCheckin()">${cur?'Update check-in':'Submit check-in'}</button>${cur?'':'<button class="btn btn-ghost" onclick="saveDraft()">Save draft</button>'}</div></div>`;
+  }
+  const mk = new Date().toISOString().slice(0,7), refl = DB.reflections.find(r => r.userId===u.id && r.month===mk);
+  const RQ = ['What did you achieve this month?','What needs adjusting?','What are you proud of?'];
+  const reflHTML = `<div class="card"><h3 style="margin-bottom:6px">Monthly reflection — ${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}</h3><p class="muted small mb">Private to you. Mentors can't see this.</p>
+    <div id="rf-err" class="form-error hide" role="alert"></div>
+    ${RQ.map((q,i) => `<div class="field"><label for="rf-${i}">${q}</label><textarea id="rf-${i}">${esc(refl?refl.answers[i]:'')}</textarea></div>`).join('')}
+    <button class="btn btn-cyan" onclick="saveReflection()">${refl?'Update reflection':'Save reflection'}</button></div>
+    ${DB.reflections.filter(r => r.userId===u.id && r.month!==mk).sort((a,b)=>a.month<b.month?1:-1).map(r => `<div class="card mt"><h4 class="mb">${esc(r.month)}</h4>${RQ.map((q,i) => r.answers[i]?`<div class="answer"><b>${q}</b>${esc(r.answers[i])}</div>`:'').join('')}</div>`).join('')}`;
+  const histHTML = mine.length ? mine.map(c => `<div class="card mb"><div class="spread"><h4>${weekLabel(c.week)}</h4>${c.status==='reviewed'?chip('Reviewed','cyan'):chip('Awaiting review','yellow')}</div><details><summary>View answers</summary>${checkinAnswers(c)}</details>${c.feedback?`<div class="fb-box"><b>Mentor feedback</b>${esc(c.feedback)}</div>`:''}</div>`).join('')
+    : empty('✅','No check-ins yet','Your submitted check-ins will be listed here.');
+  return `${pageHead('Check-ins','Weekly check-ins keep you and your mentor on the same page.')}${tabsHTML('ci',[{id:'ci-week',label:'This week',html:weekHTML},{id:'ci-refl',label:'Monthly reflection',html:reflHTML},{id:'ci-hist',label:`History (${mine.length})`,html:histHTML}])}`;
+};
+
+VIEWS.member.journal = u => {
+  const js = DB.journal.filter(j => j.userId===u.id).sort((a,b) => a.ts<b.ts?1:-1);
+  return `${pageHead('My Journal','Private reflections. You control who sees each entry.')}
+    <div class="row mb"><button class="btn btn-cyan" onclick="openJournal()">+ New entry</button></div>
+    <div class="stagger">${js.length ? js.map(e => `<div class="journal-entry">
+      <div class="row mb"><span class="meta">${fmtDate(e.ts.slice(0,10))}</span>${e.shared ? chip('Shared with mentor','yellow') : chip('🔒 Private','grey')}</div>
+      <div class="je-title">${esc(e.title||'Untitled')}</div><p class="muted" style="font-size:14px;margin:8px 0;white-space:pre-wrap">${esc(e.content)}</p>
+      <div class="row"><button class="btn btn-sm btn-ghost" onclick="openJournal('${e.id}')">Edit</button>
+      ${e.shared ? `<button class="btn btn-sm btn-ghost" onclick="shareJournal('${e.id}',false)">Revoke sharing</button>` : `<button class="btn btn-sm" ${u.mentorId?'':'disabled title="You need a mentor first"'} onclick="shareJournal('${e.id}',true)">Share with mentor</button>`}
+      <button class="btn btn-sm btn-danger" onclick="deleteJournal('${e.id}')">Delete</button></div></div>`).join('')
+    : empty('📓','Your journal is empty',"Write down what's on your mind. Entries are private unless you choose to share them.",'<button class="btn btn-cyan" onclick="openJournal()">+ Write your first entry</button>')}</div>`;
+};
+
+VIEWS.member.mentor = u => {
+  const mentor = u.mentorId ? U(u.mentorId) : null;
+  if(!mentor) return `${pageHead('My Mentor','Your assigned mentor and their guidance.')}${empty('👤','No mentor assigned yet',"An admin will pair you with a mentor. You'll get a notification when it happens.")}`;
+  const recs = DB.recs.filter(r => r.memberId===u.id).sort((a,b) => a.ts<b.ts?1:-1);
+  const fus = DB.followups.filter(f => f.memberId===u.id && f.mentorId===mentor.id).sort((a,b) => (a.done-b.done) || (a.date<b.date?-1:1));
+  return `${pageHead('My Mentor','Your assigned mentor and their guidance.')}
+    <div class="card mb"><div class="row"><div class="avatar ${avClass(mentor.id)}" style="width:64px;height:64px;font-size:26px">${esc(initial(mentor.name))}</div><div><div style="font-weight:800;font-size:20px">${esc(mentor.name)}</div><div class="muted small">Mentor${u.mentorSince?' · assigned '+fmtDate(u.mentorSince.slice(0,10)):''}</div>${mentor.bio?`<div class="small" style="margin-top:4px">${esc(mentor.bio)}</div>`:''}</div><button class="btn btn-sm btn-cyan" style="margin-left:auto" onclick="go('messages')">Send message</button></div></div>
+    <h3 class="sec">Recommendations</h3>
+    ${recs.length ? recs.map(r => { const g = r.goalId ? DB.goals.find(x => x.id===r.goalId) : null; return `<div class="card ${r.status==='done'?'':'card-cyan'} mb"><div class="meta" style="font-weight:700;margin-bottom:6px">${fmtDate(r.ts.slice(0,10))}${g?' · '+esc(g.title):''}${r.target?' · aim for '+fmtDate(r.target):''}</div><h4>${esc(r.title)}</h4><p style="font-size:14px;margin-top:6px;white-space:pre-wrap">${esc(r.body)}</p>
+      <div style="margin-top:10px">${r.status==='done' ? chip('✓ Done','green')+` <button class="btn btn-sm btn-ghost" onclick="markRec('${r.id}',false)">Undo</button>` : `<button class="btn btn-sm btn-ghost" onclick="markRec('${r.id}',true)">✓ Mark as done</button>`}</div></div>`; }).join('') : `<p class="muted">No recommendations yet.</p>`}
+    <h3 class="sec">Follow-ups</h3>
+    ${fus.length ? fus.map(f => `<div class="card mb"><div class="row"><span style="font-size:20px">${f.done?'✅':'📌'}</span><div><div style="font-weight:700;${f.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(f.task)}</div><div class="meta">${f.date?fmtDate(f.date):'No date'}</div></div></div></div>`).join('') : `<p class="muted">No follow-ups yet.</p>`}`;
+};
+
+VIEWS.member.messages = u => {
+  const mentor = u.mentorId ? U(u.mentorId) : null;
+  return `${pageHead('Messages', mentor ? `Private conversation with ${esc(mentor.name)}.` : 'Message your mentor.')}${mentor ? threadHTML(u, mentor.id) : empty('💬','No mentor to message yet',"Once an admin pairs you with a mentor, you can message them here.")}`;
+};
+
+VIEWS.member.achievements = u => {
+  const a = achievementsOf(u.id), n = a.filter(x => x.earned).length;
+  return `${pageHead('Achievements','Milestones earned through consistent effort.')}
+    <div class="badge-grid stagger">${a.map(b => `<div class="badge"><div class="badge-icon ${b.earned?'earned':'locked'}">${b.icon}</div><b>${b.label}</b><small>${b.desc}</small></div>`).join('')}</div>
+    <div class="alert alert-cyan">${n===0 ? 'Nothing earned yet — set a goal or submit a check-in to unlock your first one.' : `You've earned ${n} of ${a.length} achievements. Keep going!`}</div>`;
+};
+VIEWS.member.notifications = VIEWS.mentor.notifications = VIEWS.admin.notifications = u => {
+  const ns = DB.notifs.filter(n => n.userId===u.id).sort((a,b) => a.ts<b.ts?1:-1);
+  return `${pageHead('Notifications','')}
+    ${ns.length ? `<div class="row mb"><button class="btn btn-sm btn-ghost" onclick="markAllRead()">Mark all as read</button><button class="btn btn-sm btn-ghost" onclick="clearNotifs()">Clear all</button></div>
+    <div class="card">${ns.map(n => `<div class="notif-item" onclick="readNotif('${n.id}')"><div class="notif-dot ${n.read?'read':''}"></div><div><div style="font-size:14px;font-weight:${n.read?400:700}">${esc(n.text)}</div><div class="small muted">${fmtDT(n.ts)}</div></div></div>`).join('')}</div>`
+    : empty('🔔',"You're all caught up",'New messages, feedback and reminders will show up here.')}`;
+};
+VIEWS.member.settings = VIEWS.mentor.settings = VIEWS.admin.settings = u => settingsView(u);
+
+/* ════════ SETTINGS (all roles) ════════ */
+function settingsView(u){
+  const P = u.prefs || {};
+  const prefRows = [['messages','New messages'],['reminders','Check-in and follow-up reminders'],['feedback','Mentor feedback and recommendations'],['achievements','Achievements unlocked']];
+  const profile = `<div id="pf-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="pf-name">Full name</label><input id="pf-name" type="text" value="${esc(u.name)}"></div>
+    <div class="field"><label for="pf-pname">Preferred name</label><input id="pf-pname" type="text" value="${esc(u.pname||'')}" placeholder="What should we call you?"></div>
+    <div class="field"><label for="pf-email">Email address</label><input id="pf-email" type="email" value="${esc(u.email)}"></div>
+    <div class="field"><label for="pf-bio">Short bio</label><textarea id="pf-bio">${esc(u.bio||'')}</textarea></div>
+    ${u.role==='member' ? `<div class="field"><label for="pf-day">Preferred check-in day</label><select id="pf-day">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d => `<option ${u.checkinDay===d?'selected':''}>${d}</option>`).join('')}</select></div>` : ''}
+    <button class="btn btn-cyan" onclick="saveProfile()">Save changes</button>`;
+  const notif = `<p class="muted mb">Account and security messages are always sent. Optional notifications can be switched off.</p>
+    ${prefRows.map(([k,l]) => `<label class="check spread" style="border-bottom:1.5px solid var(--faint);padding:12px 0"><span style="font-weight:600">${l}</span><input type="checkbox" ${P[k]===false?'':'checked'} onchange="setPref('${k}',this.checked)"></label>`).join('')}`;
+  const sec = `<div id="pw-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="pw-cur">Current password</label><input id="pw-cur" type="password" autocomplete="current-password"></div>
+    <div class="field"><label for="pw-new">New password</label><input id="pw-new" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+    <div class="field"><label for="pw-new2">Confirm new password</label><input id="pw-new2" type="password" autocomplete="new-password"></div>
+    <button class="btn btn-cyan" id="pw-btn" onclick="changePassword()">Change password</button>`;
+  const acct = u.role==='admin' ? `<p class="muted">Admin accounts are managed from the Members page by another admin.</p>` : `<div class="card" style="border-color:var(--danger)"><h3 style="margin-bottom:8px;color:var(--danger)">Request account deactivation</h3>
+    <p class="muted small mb">This sends a request to the FOCUS administrators. Your data is kept for the period set by FOCUS policy.</p>
+    <button class="btn btn-sm btn-danger" onclick="requestDeactivation()">Request deactivation</button></div>`;
+  return `${pageHead('Settings','Manage your profile and account preferences.')}${tabsHTML('set',[{id:'s-p',label:'Profile',html:profile},{id:'s-n',label:'Notifications',html:notif},{id:'s-s',label:'Security',html:sec},{id:'s-a',label:'Account',html:acct}])}`;
+}
+function saveProfile(){
+  const u = me(), name = val('pf-name'), email = val('pf-email').toLowerCase();
+  if(!name) return showErr('pf-err','Your name can\'t be empty.');
+  if(!/^\S+@\S+\.\S+$/.test(email)) return showErr('pf-err','Please enter a valid email address.');
+  if(DB.users.some(x => x.email===email && x.id!==u.id)) return showErr('pf-err','Another account already uses that email.');
+  u.name = name; u.pname = val('pf-pname'); u.email = email; u.bio = val('pf-bio');
+  if(u.role==='member') u.checkinDay = $('#pf-day').value;
+  save(); render(); toast('Profile saved.');
+}
+function setPref(k, on){ const u = me(); u.prefs = u.prefs || {}; u.prefs[k] = on; save(); toast('Preference saved.'); }
+async function changePassword(){
+  const u = me(), cur = $('#pw-cur').value, n1 = $('#pw-new').value, n2 = $('#pw-new2').value;
+  hideErr('pw-err');
+  if(!(await verifyPw(cur, u))) return showErr('pw-err','Your current password isn\'t correct.');
+  if(n1.length < 8) return showErr('pw-err','New password must be at least 8 characters.');
+  if(n1 !== n2) return showErr('pw-err','The new passwords don\'t match.');
+  u.salt = uid(); u.hash = await hashPw(n1, u.salt); save();
+  ['pw-cur','pw-new','pw-new2'].forEach(i => $('#'+i).value = ''); toast('Password updated.');
+}
+function requestDeactivation(){
+  confirmBox('Request deactivation?','An administrator will be notified and will follow up with you.','Send request', () => {
+    const u = me(); admins().forEach(a => notify(a.id, `${u.name} (${u.role}) asked to deactivate their account`, '', 'deact:'+u.id));
+    audit('Deactivation requested', u.name); save(); toast('Request sent to the administrators.');
+  }, true);
+}
+
+/* notifications */
+function readNotif(id){ const n = DB.notifs.find(x => x.id===id); if(n && !n.read){ n.read = true; save(); render(); } }
+function markAllRead(){ DB.notifs.forEach(n => { if(n.userId===session) n.read = true; }); save(); render(); }
+function clearNotifs(){ DB.notifs = DB.notifs.filter(n => n.userId !== session); save(); render(); }
+
+/* ════════ GOAL ACTIONS ════════ */
+function myGoal(id){ return DB.goals.find(g => g.id===id && g.userId===session); }
+function toggleMilestone(gid, mid){
+  const g = myGoal(gid); if(!g) return; const m = g.milestones.find(x => x.id===mid); if(!m) return;
+  withAchievements(g.userId, () => { m.done = !m.done; });
+  if(m.done){ justToggled = mid; if(g.status==='Not started') g.status = 'In progress'; if(g.milestones.every(x => x.done) && g.status!=='Completed') toast('All milestones done — mark the goal complete when you\'re ready 🎉'); }
+  save(); render();
+}
+function openGoal(id){
+  const u = me(), g = id ? myGoal(id) : null;
+  const gg = g || {type: goalSlots(u.id).main ? 'smaller' : 'main'};
+  openModal(`<h2>${g?'Edit goal':'Add a new goal'}</h2><div id="gf-err" class="form-error hide" role="alert"></div>${goalFields('gf-', gg, true)}
+    ${g ? `<div class="field"><label for="gf-status">Status</label><select id="gf-status">${GOAL_STATUSES.map(s => `<option ${g.status===s?'selected':''}>${s}</option>`).join('')}</select></div>` : ''}
+    <button class="btn btn-cyan btn-full" onclick="saveGoal('${id||''}')">${g?'Save changes':'Create goal'}</button>
+    ${g ? '<p class="small muted mt">Your progress history is kept when you edit a goal.</p>' : ''}`);
+}
+function saveGoal(id){
+  const u = me(), d = readGoalFields('gf-'), type = $('#gf-type').value, g = id ? myGoal(id) : null;
+  if(!d.title) return showErr('gf-err','Please give your goal a title.');
+  const status = g ? $('#gf-status').value : 'Not started';
+  if(status !== 'Completed'){ const e = slotError(u.id, type, id); if(e) return showErr('gf-err', e); }
+  let done = false;
+  withAchievements(u.id, () => {
+    if(g){
+      writeGoal(g, d); g.type = type;
+      if(status==='Completed' && g.status!=='Completed'){ g.completedAt = nowISO(); done = true; }
+      if(status!=='Completed') g.completedAt = '';
+      g.status = status;
+    } else createGoal(u.id, d, type);
+  });
+  if(done && u.mentorId) notify(u.mentorId, `${u.name} completed a goal: ${d.title}`, 'progress');
+  save(); closeModal(); render(); toast(g ? 'Goal updated.' : 'Goal created! ✅'); if(done) confetti();
+}
+function openUpdateGoal(id){
+  const g = myGoal(id); if(!g) return;
+  const todo = g.milestones.filter(m => !m.done);
+  openModal(`<h2>Update progress</h2><p class="muted mb">${esc(g.title)}</p><div id="uf-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="uf-did">What did you accomplish?</label><textarea id="uf-did" placeholder="Describe what you worked on…"></textarea></div>
+    <div class="field"><label for="uf-well">What went well?</label><textarea id="uf-well"></textarea></div>
+    <div class="field"><label for="uf-hard">What was difficult?</label><textarea id="uf-hard"></textarea></div>
+    <div class="field"><label for="uf-next">Next step</label><input id="uf-next" type="text"></div>
+    ${g.milestones.length ? (todo.length ? `<div class="field" id="uf-ms"><label>Milestones you completed</label>${todo.map(m => `<label class="check"><input type="checkbox" value="${m.id}"> ${esc(m.title)}</label>`).join('')}</div>` : '<p class="notice">Every milestone on this goal is ticked off.</p>')
+      : `<div class="field"><label for="uf-pct">Progress: <span id="uf-pv">${g.pct||0}%</span></label><input id="uf-pct" type="range" min="0" max="100" value="${g.pct||0}" oninput="$('#uf-pv').textContent=this.value+'%'"><div class="hint">This goal has no milestones, so you set the percentage yourself.</div></div>`}
+    <button class="btn btn-cyan btn-full" onclick="saveUpdate('${g.id}')">Save update</button>`);
+}
+function saveUpdate(id){
+  const u = me(), g = myGoal(id), did = val('uf-did'); if(!g) return;
+  if(!did) return showErr('uf-err','Tell us what you accomplished, even if it was small.');
+  withAchievements(u.id, () => {
+    $$('#uf-ms input:checked').forEach(i => { const m = g.milestones.find(x => x.id===i.value); if(m) m.done = true; });
+    if(!g.milestones.length && $('#uf-pct')) g.pct = +$('#uf-pct').value;
+    if(g.status==='Not started') g.status = 'In progress';
+    DB.updates.push({id:uid(), goalId:g.id, userId:u.id, date:todayStr(), ts:nowISO(), did, well:val('uf-well'), hard:val('uf-hard'), next:val('uf-next'), pct:goalPct(g)});
+  });
+  if(u.mentorId) notify(u.mentorId, `${u.name} posted a progress update on "${g.title}"`, 'progress', 'prog:'+g.id);
+  save(); closeModal(); render(); toast('Progress saved! Keep going 💪');
+}
+function pauseGoal(id){ const g = myGoal(id); g.prevStatus = g.status; g.status = 'Paused'; save(); render(); toast('Goal paused.'); }
+function resumeGoal(id){ const g = myGoal(id); g.status = g.prevStatus && g.prevStatus!=='Paused' ? g.prevStatus : 'In progress'; save(); render(); toast('Goal resumed.'); }
+function completeGoal(id){
+  const u = me(), g = myGoal(id); if(!g) return;
+  withAchievements(u.id, () => { g.status = 'Completed'; g.completedAt = nowISO(); });
+  if(u.mentorId) notify(u.mentorId, `${u.name} completed a goal: ${g.title}`, 'progress');
+  save(); render(); confetti(); toast('Goal completed! 🎉');
+}
+function deleteGoal(id){
+  const g = myGoal(id); if(!g) return;
+  confirmBox('Delete this goal?', `"${g.title}" and its progress updates will be permanently removed.`, 'Delete goal', () => {
+    DB.goals = DB.goals.filter(x => x.id!==id); DB.updates = DB.updates.filter(x => x.goalId!==id); save(); render(); toast('Goal deleted.');
+  }, true);
+}
+
+/* ════════ CHECK-IN / REFLECTION / JOURNAL ACTIONS ════════ */
+const readCI = () => [1,2,3,4,5].map(i => val('ci-q'+i));
+function saveDraft(){ const u = me(); DB.drafts[u.id+'|'+thisWeek()] = readCI(); save(); toast('Draft saved.'); }
+function submitCheckin(){
+  const u = me(), ws = thisWeek(), a = readCI();
+  if(!a[0] || !a[1] || !a[2] || !a[3]) return showErr('ci-err','Please answer questions 1–4 (question 5 is optional).');
+  let c = DB.checkins.find(x => x.userId===u.id && x.week===ws);
+  if(c && c.status==='reviewed') return toast('This check-in has already been reviewed.','error');
+  const isNew = !c;
+  withAchievements(u.id, () => {
+    if(c){ c.answers = a; c.submittedAt = nowISO(); }
+    else DB.checkins.push({id:uid(), userId:u.id, week:ws, answers:a, submittedAt:nowISO(), status:'submitted', feedback:'', reviewedAt:null});
+  });
+  delete DB.drafts[u.id+'|'+ws];
+  if(u.mentorId) notify(u.mentorId, `${u.name} ${isNew?'submitted':'updated'} their weekly check-in`, 'reminders', 'ci:'+u.id+ws);
+  save(); render(); toast(isNew ? 'Check-in submitted! ✅' : 'Check-in updated.');
+}
+function saveReflection(){
+  const u = me(), mk = new Date().toISOString().slice(0,7), a = [0,1,2].map(i => val('rf-'+i));
+  if(!a.some(Boolean)) return showErr('rf-err','Write something in at least one box first.');
+  withAchievements(u.id, () => {
+    const r = DB.reflections.find(x => x.userId===u.id && x.month===mk);
+    if(r){ r.answers = a; r.ts = nowISO(); } else DB.reflections.push({id:uid(), userId:u.id, month:mk, answers:a, ts:nowISO()});
+  });
+  save(); render(); toast('Reflection saved.');
+}
+function openJournal(id){
+  const u = me(), e = id ? DB.journal.find(j => j.id===id && j.userId===u.id) : null;
+  openModal(`<h2>${e?'Edit entry':'New journal entry'}</h2><div id="jf-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="jf-title">Title</label><input id="jf-title" type="text" maxlength="100" value="${esc(e?e.title:'')}"></div>
+    <div class="field"><label for="jf-body">Entry</label><textarea id="jf-body" style="min-height:160px" placeholder="Write your thoughts, reflections, or notes…">${esc(e?e.content:'')}</textarea></div>
+    <div class="field"><label for="jf-share">Sharing</label><select id="jf-share"><option value="0">🔒 Private — only I can see this</option><option value="1" ${e&&e.shared?'selected':''} ${u.mentorId?'':'disabled'}>👤 Share with my mentor${u.mentorId?'':' (no mentor yet)'}</option></select></div>
+    <button class="btn btn-cyan btn-full" onclick="saveJournal('${id||''}')">Save entry</button>`);
+}
+function saveJournal(id){
+  const u = me(), title = val('jf-title'), content = val('jf-body'), shared = $('#jf-share').value==='1';
+  if(!content) return showErr('jf-err','Write something in the entry first.');
+  withAchievements(u.id, () => {
+    const e = id ? DB.journal.find(j => j.id===id && j.userId===u.id) : null;
+    if(e){ if(shared && !e.shared) notifyShared(u, title); e.title = title; e.content = content; e.shared = shared; }
+    else { DB.journal.push({id:uid(), userId:u.id, title, content, shared, ts:nowISO()}); if(shared) notifyShared(u, title); }
+  });
+  save(); closeModal(); render(); toast('Entry saved.');
+}
+const notifyShared = (u, title) => { if(u.mentorId) notify(u.mentorId, `${u.name} shared a journal entry with you${title?': '+title:''}`, 'progress'); };
+function shareJournal(id, on){
+  const u = me(), e = DB.journal.find(j => j.id===id && j.userId===u.id); if(!e) return;
+  e.shared = on; if(on) notifyShared(u, e.title); save(); render(); toast(on ? 'Shared with your mentor.' : 'Sharing revoked — your mentor can no longer see this entry.');
+}
+function deleteJournal(id){
+  confirmBox('Delete this entry?','This can\'t be undone.','Delete', () => { DB.journal = DB.journal.filter(j => !(j.id===id && j.userId===session)); save(); render(); toast('Entry deleted.'); }, true);
+}
+function markRec(id, done){ const r = DB.recs.find(x => x.id===id && x.memberId===session); if(!r) return; r.status = done ? 'done' : 'sent'; save(); render(); if(done) toast('Nice — marked as done ✓'); }
+/* ════════ MENTOR ════════ */
+function lastCheckinTs(m){ const c = DB.checkins.filter(x => x.userId===m.id); return c.length ? Math.max(...c.map(x => +new Date(x.submittedAt))) : 0; }
+function isOverdue(m){
+  if(!DB.settings.checkinsRequired) return false;
+  const base = lastCheckinTs(m) || +new Date(m.joined);
+  return Date.now() - base > 8*86400000;
+}
+function memberStatus(m){
+  if(isOverdue(m)) return {label:'Overdue', cls:'pink'};
+  if(DB.checkins.some(c => c.userId===m.id && c.status==='submitted')) return {label:'Awaiting review', cls:'yellow'};
+  if(!DB.checkins.some(c => c.userId===m.id)) return {label:'No check-ins yet', cls:'grey'};
+  return {label:'Up to date', cls:'cyan'};
+}
+const lastCheckinText = m => { const t = lastCheckinTs(m); return t ? 'Last check-in: ' + fmtDate(localDateStr(new Date(t))) : 'No check-ins yet'; };
+const noMembersEmpty = () => empty('👥','No members assigned yet','An admin will assign members to you. You\'ll get a notification as soon as someone is paired with you.');
+function memberRow(m, extra){
+  const st = memberStatus(m), gs = goalsOf(m.id).filter(g => g.status!=='Completed');
+  return `<div class="member-row" data-text="${esc(m.name.toLowerCase())}" data-status="${esc(st.label)}">
+    <div class="avatar ${avClass(m.id)}">${esc(initial(m.name))}</div>
+    <div style="flex:1;min-width:160px"><div style="font-weight:700">${esc(m.name)}</div><div class="small muted">${gs.length ? gs.map(g => esc(g.title)).join(' · ') : 'No active goals'}</div><div class="small muted">${lastCheckinText(m)}</div></div>
+    ${chip(st.label, st.cls)}<button class="btn btn-sm btn-cyan" onclick="openMemberProfile('${m.id}')">${extra||'Open profile'}</button></div>`;
+}
+
+VIEWS.mentor.overview = u => {
+  const ms = membersOf(u.id), awaiting = ms.reduce((a,m) => a + DB.checkins.filter(c => c.userId===m.id && c.status==='submitted').length, 0);
+  const over = ms.filter(isOverdue), need = ms.filter(m => memberStatus(m).label==='Overdue' || memberStatus(m).label==='Awaiting review');
+  return `${pageHead(`${timeGreeting()}, ${esc(dispName(u))}.`, 'Your overview of member progress.')}
+    <div class="stat-row">${stat(ms.length,'Assigned members','cyan')}${stat(awaiting,'Check-ins to review','yellow')}${stat(unreadMsgs(u.id),'Unread messages','pink')}${stat(over.length,'Overdue check-ins')}</div>
+    ${annBlock('mentor')}
+    ${over.length ? `<div class="alert alert-pink">⚠️ ${over.length===1 ? `<strong>${esc(over[0].name)}</strong> hasn't checked in for over a week.` : `<strong>${over.length} members</strong> haven't checked in for over a week.`} <button class="btn btn-sm btn-ghost" onclick="go('checkins',{tabs:{mc:'mc-over'}})">See who</button></div>` : ''}
+    ${ms.length ? `<h3 class="sec" style="margin-top:0">Members needing attention</h3>${need.length ? `<div class="card">${need.map(m => memberRow(m,'Review')).join('')}</div>` : '<p class="muted">Everyone is up to date. 🎉</p>'}
+    <h3 class="sec">All assigned members</h3><div class="card">${ms.map(m => memberRow(m,'View')).join('')}</div>` : noMembersEmpty()}`;
+};
+
+VIEWS.mentor.members = u => {
+  const ms = membersOf(u.id);
+  return `${pageHead('Assigned Members', ms.length ? `${ms.length} member${ms.length===1?'':'s'} currently assigned to you.` : '')}
+    ${ms.length ? `<div class="search-row"><input id="mlist-q" type="search" placeholder="Search by name…" aria-label="Search" oninput="filterRows('mlist')"><select id="mlist-s" aria-label="Status" onchange="filterRows('mlist')"><option value="">All statuses</option><option>Overdue</option><option>Awaiting review</option><option>No check-ins yet</option><option>Up to date</option></select></div>
+    <div class="card" id="mlist">${ms.map(m => memberRow(m)).join('')}<p class="muted hide" id="mlist-none" style="padding:14px 0">No members match.</p></div>` : noMembersEmpty()}`;
+};
+function filterRows(list){
+  const g = id => (document.getElementById(list+'-'+id) || {value:''}).value;
+  const q = g('q').toLowerCase().trim(), s = g('s'), r = g('r'); let n = 0;
+  $$('#'+list+' [data-text]').forEach(row => {
+    const ok = (!q || row.dataset.text.includes(q)) && (!s || row.dataset.status===s) && (!r || row.dataset.role===r);
+    row.classList.toggle('hide', !ok); if(ok) n++;
+  });
+  const none = document.getElementById(list+'-none'); if(none) none.classList.toggle('hide', n>0);
+}
+
+function reviewCard(c, withForm){
+  const m = U(c.userId); if(!m) return '';
+  return `<div class="card mb"><div class="row mb"><div class="avatar ${avClass(m.id)}">${esc(initial(m.name))}</div><div><div style="font-weight:700">${esc(m.name)}</div><div class="small muted">${weekLabel(c.week)} · submitted ${fmtDT(c.submittedAt)}</div></div><span style="margin-left:auto">${c.status==='reviewed'?chip('Reviewed','cyan'):chip('Awaiting review','yellow')}</span></div>
+    ${checkinAnswers(c)}
+    ${withForm ? `<div class="field mt"><label for="fb-${c.id}">Your feedback</label><textarea id="fb-${c.id}" placeholder="Leave feedback for ${esc(dispName(m))}…">${esc(c.feedback||'')}</textarea></div>
+      <div class="row"><button class="btn btn-sm btn-cyan" onclick="reviewCheckin('${c.id}',true)">Save feedback & mark reviewed</button><button class="btn btn-sm btn-ghost" onclick="reviewCheckin('${c.id}',false)">Mark reviewed</button></div>`
+    : (c.feedback ? `<div class="fb-box"><b>Your feedback</b>${esc(c.feedback)}</div>` : '')}</div>`;
+}
+VIEWS.mentor.checkins = u => {
+  const ms = membersOf(u.id), ids = new Set(ms.map(m => m.id));
+  const all = DB.checkins.filter(c => ids.has(c.userId));
+  const aw = all.filter(c => c.status==='submitted').sort((a,b) => a.submittedAt<b.submittedAt?-1:1);
+  const rv = all.filter(c => c.status==='reviewed').sort((a,b) => a.reviewedAt<b.reviewedAt?1:-1);
+  const od = ms.filter(isOverdue);
+  const odHTML = od.length ? od.map(m => `<div class="card mb"><div class="row"><div class="avatar ${avClass(m.id)}">${esc(initial(m.name))}</div><div style="flex:1"><div style="font-weight:700">${esc(m.name)}</div><div class="small muted">${lastCheckinText(m)}</div></div><button class="btn btn-sm btn-ghost" onclick="sendReminder('${m.id}')">Send reminder</button></div></div>`).join('') : '<p class="muted">Nobody is overdue. 🎉</p>';
+  return `${pageHead('Check-ins','Review and respond to member check-ins.')}${ms.length ? tabsHTML('mc',[
+    {id:'mc-aw', label:`Awaiting review (${aw.length})`, html: aw.length ? aw.map(c => reviewCard(c,true)).join('') : empty('✅','Nothing waiting','Check-ins from your members will appear here for review.')},
+    {id:'mc-rv', label:`Reviewed (${rv.length})`, html: rv.length ? rv.map(c => reviewCard(c,false)).join('') : '<p class="muted">No reviewed check-ins yet.</p>'},
+    {id:'mc-over', label:`Overdue (${od.length})`, html: odHTML}]) : noMembersEmpty()}`;
+};
+function reviewCheckin(cid, withFb){
+  const c = DB.checkins.find(x => x.id===cid); if(!c) return;
+  const ta = (modalOpen() ? $('#modal') : document).querySelector('#fb-'+cid), fb = ta ? ta.value.trim() : '';
+  if(withFb && !fb) return toast('Write some feedback first, or use "Mark reviewed".','error');
+  c.status = 'reviewed'; c.reviewedAt = nowISO(); if(withFb) c.feedback = fb;
+  notify(c.userId, withFb ? `${me().name} left feedback on your check-in for ${weekLabel(c.week)}` : `Your check-in for ${weekLabel(c.week)} was reviewed`, 'feedback');
+  save(); if(modalOpen()) openMemberProfile(c.userId); else render();
+  toast(withFb ? 'Feedback saved and check-in reviewed.' : 'Marked as reviewed.');
+}
+function sendReminder(mid){
+  const m = U(mid); if(!m) return;
+  notify(mid, `${me().name} is reminding you to submit your weekly check-in`, 'reminders', 'remind:'+me().id);
+  save(); toast(`Reminder sent to ${dispName(m)}.`);
+}
+
+/* ── member profile modal ── */
+function openMemberProfile(mid){
+  const u = me(), m = U(mid);
+  if(!m || m.mentorId !== u.id){ return toast('That member is not assigned to you.','error'); }
+  const gs = goalsOf(mid), cis = DB.checkins.filter(c => c.userId===mid).sort((a,b) => a.week<b.week?1:-1);
+  const shared = DB.journal.filter(j => j.userId===mid && j.shared).sort((a,b) => a.ts<b.ts?1:-1);
+  const notes = DB.notes.filter(n => n.mentorId===u.id && n.memberId===mid).sort((a,b) => a.ts<b.ts?1:-1);
+  const goalsH = gs.length ? gs.map(g => { const ups = DB.updates.filter(x => x.goalId===g.id).sort((a,b) => a.ts<b.ts?1:-1);
+      return goalCard(g,false) + (ups.length ? `<p class="small muted" style="margin:-6px 0 14px 4px">Latest update (${fmtDate(ups[0].date)}): ${esc(ups[0].did)}</p>` : ''); }).join('') : '<p class="muted">This member hasn\'t set any goals yet.</p>';
+  const ciH = cis.length ? cis.map(c => reviewCard(c, c.status==='submitted')).join('') : '<p class="muted">No check-ins yet.</p>';
+  const jH = shared.length ? shared.map(e => `<div class="journal-entry"><div class="meta mb">${fmtDate(e.ts.slice(0,10))} · shared by member</div><div class="je-title">${esc(e.title||'Untitled')}</div><p class="muted" style="font-size:14px;margin-top:6px;white-space:pre-wrap">${esc(e.content)}</p></div>`).join('') : '<p class="muted">This member hasn\'t shared any journal entries with you.</p>';
+  const nH = `<div class="field"><label for="note-text">Add a private note</label><textarea id="note-text" placeholder="Agreed actions, observations, follow-up items…"></textarea><div class="hint">Only you can see your notes.</div></div>
+    <button class="btn btn-sm btn-cyan" onclick="saveNote('${mid}')">Save note</button>
+    <div class="mt">${notes.map(n => `<div class="card card-flat mb" style="padding:12px;background:var(--faint)"><div class="spread"><span class="small muted" style="font-weight:700">${fmtDT(n.ts)}</span><button class="btn btn-sm btn-danger" onclick="deleteNote('${n.id}','${mid}')">Delete</button></div><p style="font-size:14px;white-space:pre-wrap;margin-top:4px">${esc(n.text)}</p></div>`).join('')}</div>`;
+  openModal(`<h2 style="margin-bottom:4px">${esc(m.name)}</h2><p class="muted small mb">${esc(m.email)}${m.bio?' · '+esc(m.bio):''}</p>
+    <div class="row mb"><button class="btn btn-sm btn-cyan" onclick="closeModal();go('messages',{peer:'${mid}'})">💬 Message</button><button class="btn btn-sm" onclick="openRec('${mid}')">💡 Recommendation</button><button class="btn btn-sm btn-ghost" onclick="openFollowup('${mid}')">📋 Follow-up</button></div>
+    ${tabsHTML('mp-'+mid,[{id:'mp-g',label:'Goals',html:goalsH},{id:'mp-c',label:`Check-ins (${cis.length})`,html:ciH},{id:'mp-j',label:`Journal (${shared.length})`,html:jH},{id:'mp-n',label:'My notes',html:nH}])}`);
+}
+function saveNote(mid){
+  const t = val('note-text'); if(!t) return toast('Write a note first.','error');
+  DB.notes.push({id:uid(), mentorId:session, memberId:mid, text:t, ts:nowISO()}); save(); openMemberProfile(mid); toast('Note saved.');
+}
+function deleteNote(id, mid){ DB.notes = DB.notes.filter(n => !(n.id===id && n.mentorId===session)); save(); openMemberProfile(mid); }
+
+/* ── recommendations ── */
+VIEWS.mentor.recommendations = u => {
+  const rs = DB.recs.filter(r => r.mentorId===u.id).sort((a,b) => a.ts<b.ts?1:-1), has = membersOf(u.id).length;
+  return `${pageHead('Recommendations','Send personalized guidance to your members.')}
+    <div class="row mb"><button class="btn btn-cyan" ${has?'':'disabled'} onclick="openRec()">+ New recommendation</button></div>
+    ${rs.length ? `<div class="stagger">${rs.map(r => { const m = U(r.memberId), g = r.goalId ? DB.goals.find(x => x.id===r.goalId) : null;
+      return `<div class="card ${r.status==='done'?'':'card-cyan'} mb"><div class="spread mb"><b>${esc(m?m.name:'Unknown member')}</b><span class="small" style="opacity:.8">${fmtDate(r.ts.slice(0,10))}${g?' · '+esc(g.title):''}</span></div><h4>${esc(r.title)}</h4><p style="font-size:14px;margin:6px 0 10px;white-space:pre-wrap">${esc(r.body)}</p>${r.status==='done' ? chip('Member marked done','green') : chip('Sent','yellow')}</div>`; }).join('')}</div>`
+    : empty('💡','No recommendations yet', has ? 'Send a member some tailored guidance — they\'ll be notified straight away.' : 'Once members are assigned to you, you can send them recommendations here.')}`;
+};
+function openRec(mid){
+  const ms = membersOf(session); if(!ms.length) return;
+  openModal(`<h2>New recommendation</h2><div id="rc-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="rc-m">Member</label><select id="rc-m" onchange="fillRecGoals()">${ms.map(m => `<option value="${m.id}" ${m.id===mid?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="rc-t">Title</label><input id="rc-t" type="text" maxlength="120"></div>
+    <div class="field"><label for="rc-g">Related goal (optional)</label><select id="rc-g"></select></div>
+    <div class="field"><label for="rc-b">Recommendation</label><textarea id="rc-b" placeholder="Describe the suggested action or resource…"></textarea></div>
+    <div class="field"><label for="rc-d">Target date (optional)</label><input id="rc-d" type="date"></div>
+    <button class="btn btn-cyan btn-full" onclick="saveRec()">Send recommendation</button>`);
+  fillRecGoals();
+}
+function fillRecGoals(){
+  const mid = $('#rc-m').value, gs = goalsOf(mid).filter(g => g.status!=='Completed');
+  $('#rc-g').innerHTML = '<option value="">None</option>' + gs.map(g => `<option value="${g.id}">${esc(g.title)}</option>`).join('');
+}
+function saveRec(){
+  const mid = $('#rc-m').value, title = val('rc-t'), body = val('rc-b');
+  if(!title || !body) return showErr('rc-err','Please add a title and the recommendation itself.');
+  const u = me();
+  DB.recs.push({id:uid(), mentorId:u.id, memberId:mid, title, body, goalId:$('#rc-g').value, target:$('#rc-d').value, ts:nowISO(), status:'sent'});
+  notify(mid, `${u.name} sent you a recommendation: ${title}`, 'feedback');
+  save(); closeModal(); render(); toast('Recommendation sent.');
+}
+
+/* ── messages ── */
+VIEWS.mentor.messages = u => {
+  const ms = membersOf(u.id);
+  if(view.peer){
+    const p = U(view.peer);
+    if(p && p.mentorId===u.id) return `${pageHead('Messages','')}<button class="btn btn-sm btn-ghost mb" onclick="go('messages')">← All conversations</button>${threadHTML(u, p.id)}`;
+  }
+  return `${pageHead('Messages','Conversations with your assigned members.')}${ms.length ? `<div class="grid-2 stagger">${ms.map(m => {
+    const last = DB.messages.filter(x => (x.fromId===m.id && x.toId===u.id) || (x.fromId===u.id && x.toId===m.id)).sort((a,b) => a.ts<b.ts?1:-1)[0], n = unreadMsgs(u.id, m.id);
+    return `<div class="card lift" style="cursor:pointer" onclick="go('messages',{peer:'${m.id}'})"><div class="row"><div class="avatar ${avClass(m.id)}">${esc(initial(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:700">${esc(m.name)}</div><div class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${last ? esc(last.text) : 'No messages yet'}</div></div>${n?`<span class="count">${n}</span>`:''}</div></div>`; }).join('')}</div>` : noMembersEmpty()}`;
+};
+
+/* ── follow-ups ── */
+VIEWS.mentor.followups = u => {
+  const fs = DB.followups.filter(f => f.mentorId===u.id).sort((a,b) => (a.done-b.done) || ((a.date||'9999')<(b.date||'9999')?-1:1)), has = membersOf(u.id).length;
+  return `${pageHead('Follow-ups','Reminders and tasks you\'ve created for your members.')}
+    <div class="row mb"><button class="btn btn-cyan" ${has?'':'disabled'} onclick="openFollowup()">+ New follow-up</button></div>
+    ${fs.length ? `<div class="stagger">${fs.map(f => { const m = U(f.memberId); const late = !f.done && f.date && daysUntil(f.date) < 0;
+      return `<div class="card mb"><div class="row"><span style="font-size:20px">${f.done?'✅':'📌'}</span><div style="flex:1;min-width:160px"><div style="font-weight:700;${f.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(f.task)}</div><div class="meta">${esc(m?m.name:'Unknown')} · ${f.date?fmtDate(f.date):'No date'}${late?' · <b class="late">overdue</b>':''}</div></div>
+      <button class="btn btn-sm btn-ghost" onclick="toggleFollowup('${f.id}')">${f.done?'Reopen':'Mark done'}</button><button class="btn btn-sm btn-danger" onclick="deleteFollowup('${f.id}')">Delete</button></div></div>`; }).join('')}</div>`
+    : empty('📋','No follow-ups yet', has ? 'Create a reminder for a member — like reviewing a draft or checking in after an exam.' : 'Once members are assigned to you, you can create follow-ups for them.')}`;
+};
+function openFollowup(mid){
+  const ms = membersOf(session); if(!ms.length) return;
+  openModal(`<h2>New follow-up</h2><div id="fu-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="fu-m">Member</label><select id="fu-m">${ms.map(m => `<option value="${m.id}" ${m.id===mid?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="fu-t">What needs to happen?</label><input id="fu-t" type="text" maxlength="140"></div>
+    <div class="field"><label for="fu-d">Date (optional)</label><input id="fu-d" type="date"></div>
+    <button class="btn btn-cyan btn-full" onclick="saveFollowup()">Create follow-up</button>`);
+}
+function saveFollowup(){
+  const mid = $('#fu-m').value, task = val('fu-t'); if(!task) return showErr('fu-err','Describe the follow-up.');
+  const u = me(), date = $('#fu-d').value;
+  DB.followups.push({id:uid(), mentorId:u.id, memberId:mid, task, date, done:false, ts:nowISO()});
+  notify(mid, `${u.name} added a follow-up for you: ${task}`, 'reminders');
+  save(); closeModal(); render(); toast('Follow-up created.');
+}
+function toggleFollowup(id){ const f = DB.followups.find(x => x.id===id && x.mentorId===session); if(f){ f.done = !f.done; save(); render(); } }
+function deleteFollowup(id){ DB.followups = DB.followups.filter(x => !(x.id===id && x.mentorId===session)); save(); render(); toast('Follow-up deleted.'); }
+/* ════════ ADMIN ════════ */
+const STATUS_LABEL = {active:'Active', pending:'Pending', suspended:'Suspended', deactivated:'Deactivated'};
+const STATUS_CHIP = {active:'cyan', pending:'yellow', suspended:'pink', deactivated:'grey'};
+const userStatusChip = s => chip(STATUS_LABEL[s] || s, STATUS_CHIP[s] || 'grey');
+const roleChip = r => chip(r[0].toUpperCase()+r.slice(1), r==='member'?'cyan':r==='mentor'?'yellow':'pink');
+const isLastAdmin = id => { const a = admins(); return a.length <= 1 && a.some(x => x.id===id); };
+const activeMembers = () => DB.users.filter(u => u.role==='member' && u.status==='active');
+const activeMentors = () => DB.users.filter(u => u.role==='mentor' && u.status==='active');
+
+function weekStats(ws){
+  const end = parseDate(ws); end.setDate(end.getDate()+6); end.setHours(23,59,59,999);
+  const elig = DB.users.filter(u => u.role==='member' && u.status==='active' && new Date(u.joined) <= end);
+  const done = elig.filter(u => DB.checkins.some(c => c.userId===u.id && c.week===ws)).length;
+  return {elig:elig.length, done, pct: elig.length ? Math.round(done/elig.length*100) : 0};
+}
+
+VIEWS.admin.overview = u => {
+  const members = DB.users.filter(x => x.role==='member' && x.status!=='deactivated'), mentors = activeMentors(), pend = DB.users.filter(x => x.status==='pending');
+  const unassigned = activeMembers().filter(m => !m.mentorId || !U(m.mentorId)), inbox = DB.contacts.filter(c => !c.read).length;
+  const gs = DB.goals.filter(isActiveGoal), ws = weekStats(thisWeek());
+  const withGoals = activeMembers().filter(m => goalsOf(m.id).some(isActiveGoal)).length, am = activeMembers().length;
+  const withMentor = am - unassigned.length;
+  const pctOf = (a,b) => b ? Math.round(a/b*100) : 0;
+  const starting = !members.length || !mentors.length;
+  return `${pageHead('Admin overview','Manage your community and platform.')}
+    <div class="stat-row">${stat(members.length,'Members','cyan')}${stat(mentors.length,'Active mentors','yellow')}${stat(pend.length,'Pending accounts','pink')}${stat(gs.length,'Active goals')}</div>
+    ${annBlock('admin')}
+    ${starting ? `<div class="card card-yellow mb"><h3 style="margin-bottom:10px">Getting started</h3><ol style="padding-left:20px;line-height:2;font-size:15px">
+      <li>Give mentors the <strong>mentor access code</strong> — <a href="#" onclick="event.preventDefault();go('security')" style="text-decoration:underline;font-weight:700">find it under Access & Security</a>.</li>
+      <li>Members join from the Join page (no code needed${DB.settings.allowRegistration?'':' — but registration is currently closed'}).</li>
+      <li>Pair each member with a mentor on the <a href="#" onclick="event.preventDefault();go('assignments')" style="text-decoration:underline;font-weight:700">Assignments</a> page.</li></ol></div>` : ''}
+    ${pend.length ? `<div class="alert alert-yellow">⏳ ${pend.length} account${pend.length===1?' is':'s are'} waiting for approval. <button class="btn btn-sm btn-ghost" onclick="go('members')">Review</button></div>` : ''}
+    ${unassigned.length ? `<div class="alert alert-yellow">🔗 ${unassigned.length} active member${unassigned.length===1?' has':'s have'} no mentor yet. <button class="btn btn-sm btn-ghost" onclick="go('assignments')">Assign mentors</button></div>` : ''}
+    ${inbox ? `<div class="alert alert-cyan">📥 ${inbox} unread contact message${inbox===1?'':'s'}. <button class="btn btn-sm btn-ghost" onclick="go('inbox')">Open inbox</button></div>` : ''}
+    <div class="grid-2"><div class="card"><h3 class="mb">Quick actions</h3><div class="row" style="flex-direction:column;align-items:stretch">
+      <button class="btn btn-sm btn-cyan" onclick="go('members')">Manage members</button><button class="btn btn-sm" onclick="go('assignments')">Assign mentors</button><button class="btn btn-sm btn-ghost" onclick="go('announcements')">Post announcement</button><button class="btn btn-sm btn-ghost" onclick="go('reports')">View reports</button></div></div>
+    <div class="card"><h3 class="mb">Platform health</h3>${am ? [['Check-in completion this week',ws.pct],['Members with active goals',pctOf(withGoals,am)],['Members with a mentor',pctOf(withMentor,am)]].map(([l,p]) => `<div style="margin-bottom:12px"><div class="spread small" style="margin-bottom:4px"><span>${l}</span><strong>${p}%</strong></div>${progBar(p)}</div>`).join('') : '<p class="muted">Health stats appear once members have joined.</p>'}</div></div>`;
+};
+
+/* ── members ── */
+VIEWS.admin.members = u => {
+  const list = DB.users.slice().sort((a,b) => a.name.localeCompare(b.name));
+  return `${pageHead('Members','Search, view, and manage every account.')}
+    <div class="search-row"><input id="alist-q" type="search" placeholder="Search by name or email…" aria-label="Search" oninput="filterRows('alist')">
+      <select id="alist-r" aria-label="Role" onchange="filterRows('alist')"><option value="">All roles</option><option value="member">Member</option><option value="mentor">Mentor</option><option value="admin">Admin</option></select>
+      <select id="alist-s" aria-label="Status" onchange="filterRows('alist')"><option value="">All statuses</option>${Object.values(STATUS_LABEL).map(s => `<option>${s}</option>`).join('')}</select>
+      <button class="btn btn-sm btn-cyan" onclick="openAddMember()">+ Add account</button></div>
+    <div class="card" id="alist" style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Mentor</th><th>Joined</th><th></th></tr></thead><tbody>
+      ${list.map(m => `<tr data-text="${esc((m.name+' '+m.email).toLowerCase())}" data-role="${m.role}" data-status="${STATUS_LABEL[m.status]}"><td><div style="font-weight:700">${esc(m.name)}</div><div class="small muted">${esc(m.email)}</div></td><td>${roleChip(m.role)}</td><td>${userStatusChip(m.status)}</td><td class="small">${m.role==='member' ? (m.mentorId && U(m.mentorId) ? esc(U(m.mentorId).name) : '<span class="muted">Unassigned</span>') : '—'}</td><td class="small muted">${fmtDate(m.joined.slice(0,10))}</td><td><button class="btn btn-sm btn-ghost" onclick="openAdminMember('${m.id}')">Manage</button></td></tr>`).join('')}
+    </tbody></table><p class="muted hide" id="alist-none" style="padding:14px">No accounts match.</p></div>`;
+};
+function openAddMember(){
+  openModal(`<h2>Add an account</h2><div id="ad-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="ad-name">Full name</label><input id="ad-name" type="text"></div>
+    <div class="field"><label for="ad-email">Email</label><input id="ad-email" type="email"></div>
+    <div class="field"><label for="ad-role">Role</label><select id="ad-role"><option value="member">Member</option><option value="mentor">Mentor</option></select></div>
+    <div class="field"><label for="ad-pw">Temporary password</label><input id="ad-pw" type="text" autocomplete="off" placeholder="At least 8 characters"><div class="hint">Give this to the person securely. They can change it in Settings → Security.</div></div>
+    <button class="btn btn-cyan btn-full" id="ad-btn" onclick="createAccount()">Create account</button>`);
+}
+async function createAccount(){
+  const name = val('ad-name'), email = val('ad-email').toLowerCase(), pw = $('#ad-pw').value, role = $('#ad-role').value;
+  if(!name) return showErr('ad-err','Please enter a name.');
+  if(!/^\S+@\S+\.\S+$/.test(email)) return showErr('ad-err','Please enter a valid email.');
+  if(DB.users.some(x => x.email===email)) return showErr('ad-err','An account with that email already exists.');
+  if(pw.length < 8) return showErr('ad-err','Temporary password must be at least 8 characters.');
+  setBusy('ad-btn', true);
+  const salt = uid(), hash = await hashPw(pw, salt);
+  DB.users.push({id:uid(), name, email, role, salt, hash, status:'active', bio:'', pname:'', checkinDay:'Sunday', prefs:{}, joined:nowISO(), mentorId:'', onboarded: role!=='member'});
+  audit('Account created', `${name} (${role})`); save(); closeModal(); render(); toast('Account created.');
+}
+function openAdminMember(id){
+  const m = U(id); if(!m) return; const self = m.id === session;
+  const ms = m.role==='mentor' ? membersOf(m.id) : [];
+  openModal(`<h2 style="margin-bottom:4px">${esc(m.name)}</h2><p class="muted small mb">${esc(m.email)} · joined ${fmtDate(m.joined.slice(0,10))}</p>
+    <div class="row mb">${roleChip(m.role)} ${userStatusChip(m.status)}${self?' '+chip('You','grey'):''}</div><div id="am-err" class="form-error hide" role="alert"></div>
+    ${m.role==='mentor' ? `<div class="mb"><div class="lbl">Assigned members (${ms.length})</div>${ms.length ? ms.map(x => `<div class="small">• ${esc(x.name)}</div>`).join('') : '<p class="muted small">None yet.</p>'}</div>` : ''}
+    <div class="field"><label for="am-role">Role</label><select id="am-role" ${self?'disabled':''} onchange="$('#am-mw').classList.toggle('hide',this.value!=='member')"><option value="member" ${m.role==='member'?'selected':''}>Member</option><option value="mentor" ${m.role==='mentor'?'selected':''}>Mentor</option><option value="admin" ${m.role==='admin'?'selected':''}>Admin</option></select></div>
+    <div class="field ${m.role==='member'?'':'hide'}" id="am-mw"><label for="am-mentor">Assigned mentor</label><select id="am-mentor"><option value="">Unassigned</option>${activeMentors().map(t => `<option value="${t.id}" ${m.mentorId===t.id?'selected':''}>${esc(t.name)} (${membersOf(t.id).length})</option>`).join('')}</select></div>
+    <button class="btn btn-cyan btn-full mb" onclick="saveAdminMember('${id}')">Save changes</button>
+    <div class="row">
+      ${m.status==='pending' ? `<button class="btn btn-sm btn-ok" onclick="setUserStatus('${id}','active')">Approve account</button>` : ''}
+      ${m.status==='active' ? `<button class="btn btn-sm btn-ghost" ${self?'disabled':''} onclick="setUserStatus('${id}','suspended')">Suspend</button>` : ''}
+      ${m.status==='suspended' || m.status==='deactivated' ? `<button class="btn btn-sm btn-ok" onclick="setUserStatus('${id}','active')">Reactivate</button>` : ''}
+      ${m.status!=='deactivated' ? `<button class="btn btn-sm btn-danger" ${self?'disabled':''} onclick="setUserStatus('${id}','deactivated')">Deactivate</button>` : ''}
+      <button class="btn btn-sm btn-ghost" onclick="openResetPw('${id}')">Reset password</button></div>
+    ${self ? '<p class="small muted mt">You can\'t suspend, deactivate or change the role of your own account.</p>' : ''}`);
+}
+function assignMentorTo(mid, tid){
+  const m = U(mid); if(!m || m.mentorId===tid) return;
+  const t = tid ? U(tid) : null;
+  withAchievements(mid, () => { m.mentorId = tid; m.mentorSince = tid ? nowISO() : ''; });
+  if(t){ notify(mid, `You've been paired with ${t.name} as your mentor`, ''); notify(t.id, `${m.name} has been assigned to you`, ''); audit('Mentor assignment', `${m.name} → ${t.name}`); }
+  else audit('Mentor unassigned', m.name);
+}
+function saveAdminMember(id){
+  const m = U(id); if(!m) return;
+  const role = $('#am-role').value;
+  if(role !== m.role){
+    if(m.id===session) return showErr('am-err','You can\'t change your own role.');
+    if(m.role==='admin' && isLastAdmin(m.id)) return showErr('am-err','This is the only active admin — make someone else an admin first.');
+    const old = m.role;
+    if(old==='mentor') membersOf(m.id).forEach(x => { x.mentorId = ''; x.mentorSince = ''; notify(x.id, `${m.name} is no longer your mentor. An admin will assign a new one.`, ''); });
+    if(role!=='member') m.mentorId = '';
+    m.role = role; m.onboarded = true;
+    audit('Role change', `${m.name}: ${old} → ${role}`);
+  }
+  if(m.role==='member') assignMentorTo(m.id, $('#am-mentor').value);
+  save(); closeModal(); render(); toast('Changes saved.');
+}
+function setUserStatus(id, status){
+  const m = U(id); if(!m) return;
+  const apply = () => {
+    if(m.id===session && status!=='active') return toast('You can\'t do that to your own account.','error');
+    if(status!=='active' && m.role==='admin' && isLastAdmin(m.id)) return toast('This is the only active admin.','error');
+    const was = m.status;
+    m.status = status; audit(`Account ${status==='active'?(was==='pending'?'approved':'reactivated'):status}`, m.name);
+    if(status==='active') notify(m.id, 'Your account is active', '');
+    save(); closeModal(); render(); toast(`${m.name} is now ${status}.`);
+  };
+  if(status==='suspended' || status==='deactivated') confirmBox(`${status==='suspended'?'Suspend':'Deactivate'} ${m.name}?`, 'They will be signed out and unable to log in. Their data is kept.', status==='suspended'?'Suspend':'Deactivate', apply, true);
+  else apply();
+}
+function openResetPw(id){
+  const m = U(id); if(!m) return;
+  openModal(`<h2>Reset password</h2><p class="muted mb">Set a temporary password for <b>${esc(m.name)}</b>. Share it with them securely — they can change it in Settings → Security.</p>
+    <div id="rp-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="rp-pw">New temporary password</label><input id="rp-pw" type="text" autocomplete="off" placeholder="At least 8 characters"></div>
+    <button class="btn btn-cyan btn-full" id="rp-btn" onclick="doResetPw('${id}')">Reset password</button>`);
+}
+async function doResetPw(id){
+  const m = U(id), pw = $('#rp-pw').value; if(!m) return;
+  if(pw.length < 8) return showErr('rp-err','Password must be at least 8 characters.');
+  setBusy('rp-btn', true);
+  m.salt = uid(); m.hash = await hashPw(pw, m.salt); audit('Password reset', m.name); save(); closeModal(); toast('Password reset. Share the new password with them securely.');
+}
+
+/* ── mentors ── */
+VIEWS.admin.mentors = u => {
+  const ms = DB.users.filter(x => x.role==='mentor');
+  return `${pageHead('Mentors','Track and manage mentor accounts.')}
+    ${ms.length ? `<div class="card mb" style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Members</th><th>Status</th><th></th></tr></thead><tbody>
+      ${ms.map(t => `<tr><td><div style="font-weight:700">${esc(t.name)}</div><div class="small muted">${esc(t.email)}</div></td><td style="font-weight:800;font-size:18px">${membersOf(t.id).length}</td><td>${userStatusChip(t.status)}</td><td><button class="btn btn-sm btn-ghost" onclick="openAdminMember('${t.id}')">Manage</button></td></tr>`).join('')}</tbody></table></div>`
+    : empty('🎓','No mentors yet','Share the mentor access code (under Access & Security) so mentors can register — or promote an existing member from the Members page.','<button class="btn btn-cyan" onclick="go(\'security\')">Go to access codes</button>')}
+    <div class="notice">There is no cap on how many members a mentor can have, but keep an eye on workload — the table above shows each mentor's count.</div>`;
+};
+
+/* ── assignments ── */
+VIEWS.admin.assignments = u => {
+  const members = activeMembers().sort((a,b) => (!!a.mentorId - !!b.mentorId) || a.name.localeCompare(b.name)), mentors = activeMentors();
+  const form = !members.length || !mentors.length
+    ? empty('🔗', !members.length ? 'No active members yet' : 'No active mentors yet', !members.length ? 'Members will show up here once they register.' : 'Share the mentor access code so mentors can register, then you can pair them here.')
+    : `<div class="card card-yellow mb"><h3 class="mb">Assign a member</h3><div id="as-err" class="form-error hide" role="alert"></div>
+      <div class="field"><label for="as-m">Member</label><select id="as-m">${members.map(m => `<option value="${m.id}">${esc(m.name)} — ${m.mentorId&&U(m.mentorId)?'with '+esc(U(m.mentorId).name):'unassigned'}</option>`).join('')}</select></div>
+      <div class="field"><label for="as-t">Mentor</label><select id="as-t">${mentors.map(t => `<option value="${t.id}">${esc(t.name)} (${membersOf(t.id).length} member${membersOf(t.id).length===1?'':'s'})</option>`).join('')}</select></div>
+      <button class="btn btn-cyan btn-full" onclick="doAssign()">Confirm assignment</button></div>`;
+  return `${pageHead('Assignments','Pair members with mentors. Both are notified.')}${form}
+    ${members.length ? `<div class="card"><h3 class="mb">Current assignments</h3>${members.map(m => `<div class="member-row"><div class="avatar ${avClass(m.id)}">${esc(initial(m.name))}</div><div style="flex:1;min-width:140px"><div style="font-weight:700">${esc(m.name)}</div><div class="small muted">${m.mentorId&&U(m.mentorId)?esc(U(m.mentorId).name):'Unassigned'}</div></div>${m.mentorId&&U(m.mentorId)?`<button class="btn btn-sm btn-ghost" onclick="unassign('${m.id}')">Unassign</button>`:chip('Needs a mentor','pink')}</div>`).join('')}</div>` : ''}`;
+};
+function doAssign(){
+  const mid = $('#as-m').value, tid = $('#as-t').value; if(U(mid).mentorId===tid) return showErr('as-err','They already have that mentor.');
+  assignMentorTo(mid, tid); save(); render(); toast('Assignment saved — member and mentor notified. ✅');
+}
+function unassign(mid){ const m = U(mid); confirmBox('Unassign mentor?', `${m.name} will have no mentor until you assign a new one.`, 'Unassign', () => { assignMentorTo(mid, ''); save(); render(); toast('Mentor unassigned.'); }, true); }
+
+/* ── goals & activity ── */
+VIEWS.admin.goals = u => {
+  const gs = DB.goals, act = gs.filter(isActiveGoal).length, paused = gs.filter(g => g.status==='Paused').length;
+  const mk = new Date().toISOString().slice(0,7), doneMonth = gs.filter(g => g.completedAt && g.completedAt.slice(0,7)===mk).length;
+  const cat = c => gs.filter(g => g.cat===c).length, pc = c => gs.length ? Math.round(cat(c)/gs.length*100) : 0;
+  return `${pageHead('Goals & Activity','Platform-wide goal statistics.')}
+    ${gs.length ? `<div class="stat-row">${stat(act,'Active goals','cyan')}${stat(doneMonth,'Completed this month','yellow')}${stat(paused,'Paused','pink')}${stat(gs.filter(g=>g.status==='Completed').length,'Completed in total')}</div>
+    <div class="grid-3">${[['academic','🎓 Academic','cyan'],['personal','✨ Personal','yellow'],['fitness','💪 Fitness','pink']].map(([c,l,k]) => `<div class="card card-${k}"><h3>${l}</h3><p style="font-size:28px;font-weight:900;margin-top:6px">${cat(c)}</p><p class="small">${pc(c)}% of all goals</p></div>`).join('')}</div>`
+    : empty('🎯','No goals yet','Goal statistics will appear here once members start setting goals.')}`;
+};
+
+/* ── announcements ── */
+VIEWS.admin.announcements = u => {
+  const as = DB.announcements.slice().sort((a,b) => a.ts<b.ts?1:-1), AUD = {all:'Everyone', members:'Members', mentors:'Mentors', admins:'Admins'};
+  return `${pageHead('Announcements','Publish updates to everyone or a group.')}
+    <div class="card mb"><h3 class="mb">New announcement</h3><div id="an-err" class="form-error hide" role="alert"></div>
+      <div class="field"><label for="an-t">Title</label><input id="an-t" type="text" maxlength="120"></div>
+      <div class="field"><label for="an-b">Message (optional)</label><textarea id="an-b"></textarea></div>
+      <div class="field"><label for="an-a">Send to</label><select id="an-a"><option value="all">Everyone</option><option value="members">Members only</option><option value="mentors">Mentors only</option><option value="admins">Admins only</option></select></div>
+      <button class="btn btn-cyan" onclick="publishAnnouncement()">Publish announcement</button></div>
+    <h3 class="sec" style="margin-top:0">Published</h3>
+    ${as.length ? as.map(a => `<div class="card mb"><div class="spread"><div><div style="font-weight:700">${esc(a.title)}</div>${a.body?`<p class="muted small" style="margin-top:4px;white-space:pre-wrap">${esc(a.body)}</p>`:''}<div class="small muted" style="margin-top:4px">${fmtDate(a.ts.slice(0,10))} · ${AUD[a.audience]} · by ${esc(a.by)}</div></div><button class="btn btn-sm btn-danger" onclick="deleteAnnouncement('${a.id}')">Delete</button></div></div>`).join('') : '<p class="muted">Nothing published yet.</p>'}`;
+};
+function publishAnnouncement(){
+  const t = val('an-t'), b = val('an-b'), aud = $('#an-a').value; if(!t) return showErr('an-err','Please add a title.');
+  const u = me(); DB.announcements.push({id:uid(), title:t, body:b, audience:aud, ts:nowISO(), by:u.name});
+  DB.users.filter(x => x.status==='active' && x.id!==u.id && (aud==='all' || aud===x.role+'s')).forEach(x => notify(x.id, `📢 ${t}`, ''));
+  audit('Announcement published', t); save(); render(); toast('Announcement published.');
+}
+function deleteAnnouncement(id){ confirmBox('Delete announcement?','It will disappear for everyone.','Delete', () => { DB.announcements = DB.announcements.filter(a => a.id!==id); save(); render(); toast('Deleted.'); }, true); }
+
+/* ── inbox ── */
+VIEWS.admin.inbox = u => {
+  const cs = DB.contacts;
+  return `${pageHead('Inbox','Messages sent through the public Contact page.')}
+    ${cs.length ? cs.map(c => `<div class="card mb" style="${c.read?'':'border-left:8px solid var(--pink)'}"><div class="spread mb"><div><b>${esc(c.name)}</b> <span class="muted small">· ${esc(c.email)}</span></div><div class="row">${c.type==='Report a concern'?chip('Concern','pink'):chip(c.type,'grey')}<span class="small muted">${fmtDT(c.ts)}</span></div></div>
+      <p style="font-size:14px;white-space:pre-wrap">${esc(c.message)}</p>
+      <div class="row mt"><a class="btn btn-sm btn-cyan" href="mailto:${esc(c.email)}?subject=${encodeURIComponent('Re: your message to FOCUS')}">Reply by email</a><button class="btn btn-sm btn-ghost" onclick="toggleContact('${c.id}')">${c.read?'Mark unread':'Mark read'}</button><button class="btn btn-sm btn-danger" onclick="deleteContact('${c.id}')">Delete</button></div></div>`).join('')
+    : empty('📥','Inbox is empty','Messages from the Contact page will arrive here.')}`;
+};
+function toggleContact(id){ const c = DB.contacts.find(x => x.id===id); if(c){ c.read = !c.read; save(); render(); } }
+function deleteContact(id){ confirmBox('Delete this message?','This can\'t be undone.','Delete', () => { DB.contacts = DB.contacts.filter(x => x.id!==id); save(); render(); }, true); }
+
+/* ── reports ── */
+VIEWS.admin.reports = u => {
+  const ws = [0,1,2,3].map(i => { let w = thisWeek(); for(let k=0;k<i;k++) w = prevWeek(w); return w; });
+  const mk = new Date().toISOString().slice(0,7);
+  const newM = DB.users.filter(x => x.role==='member' && x.joined.slice(0,7)===mk).length;
+  const gs = DB.goals, c = k => gs.filter(g => g.cat===k).length, pc = k => gs.length ? Math.round(c(k)/gs.length*100) : 0;
+  const hasMembers = DB.users.some(x => x.role==='member');
+  if(!hasMembers) return `${pageHead('Reports','Aggregated participation data.')}${empty('📊','Nothing to report yet','Reports fill in as members join, set goals and check in.')}`;
+  const cur = weekStats(ws[0]);
+  return `${pageHead('Reports','Aggregated participation data and trends.')}
+    <div class="stat-row">${stat(cur.pct,'Check-in completion (this week)','cyan','%')}${stat(newM,'New members this month','yellow')}${stat(gs.filter(g => g.completedAt && g.completedAt.slice(0,7)===mk).length,'Goals completed this month','pink')}</div>
+    <div class="card mb"><h3 class="mb">Check-in completion by week</h3>${ws.map(w => { const s = weekStats(w); return `<div class="row" style="margin-bottom:10px;flex-wrap:nowrap"><span class="small" style="width:110px;flex:none">${weekLabel(w)}${w===ws[0]?' (now)':''}</span><div style="flex:1">${progBar(s.pct)}</div><span class="small" style="width:90px;text-align:right;font-weight:700">${s.done}/${s.elig} · ${s.pct}%</span></div>`; }).join('')}</div>
+    <div class="card"><h3 class="mb">Goal categories</h3>${gs.length ? [['academic','Academic',''],['personal','Personal','yellow'],['fitness','Fitness','pink']].map(([k,l,col]) => `<div class="mb"><div class="spread small" style="margin-bottom:4px"><span>${l}</span><strong>${c(k)} · ${pc(k)}%</strong></div>${progBar(pc(k), col)}</div>`).join('') : '<p class="muted">No goals have been set yet.</p>'}</div>`;
+};
+
+/* ── security / codes / backup ── */
+VIEWS.admin.security = u => {
+  const S = DB.settings, rev = view.reveal || {};
+  const codeCard = (k, label, desc) => `<div class="card mb"><h3 style="margin-bottom:6px">${label}</h3><p class="muted small">${desc}</p>
+    <div><span class="code-box">${rev[k] ? esc(S[k+'Code']) : '••••••••'}</span></div>
+    <div class="row"><button class="btn btn-sm btn-ghost" onclick="view.reveal=Object.assign({},view.reveal,{${k}:${!rev[k]}});render()">${rev[k]?'Hide':'Reveal'}</button><button class="btn btn-sm btn-ghost" onclick="copyCode('${k}')">Copy</button><button class="btn btn-sm ${k==='admin'?'btn-pink':'btn-cyan'}" onclick="openRotate('${k}')">Change code</button></div></div>`;
+  return `${pageHead('Access & Security','Registration codes, sign-up rules and backups.')}
+    <div class="notice">Access codes control who can register as a mentor or admin. Anyone who knows a code can use it, so share it carefully and change it if it leaks. Changing a code doesn't affect existing accounts.</div>
+    ${codeCard('mentor','Mentor access code','Give this to people who should be able to register as mentors.')}
+    ${codeCard('admin','Admin access code','Only give this to people who should have full control of FOCUS.')}
+    <div class="card mb"><h3 class="mb">Registration settings</h3>
+      <label class="check"><input type="checkbox" ${S.allowRegistration?'checked':''} onchange="setSetting('allowRegistration',this.checked,'New member registration')"> Allow new member registrations</label>
+      <label class="check"><input type="checkbox" ${S.requireApproval?'checked':''} onchange="setSetting('requireApproval',this.checked,'Admin approval for new members')"> Require admin approval for new members</label></div>
+    <div class="card"><h3 style="margin-bottom:6px">Data & backup</h3><p class="muted small mb">FOCUS stores everything in this browser. Download a backup regularly — it's the only copy besides this browser's storage, and it lets you move FOCUS to another browser or computer.</p>
+      <div class="row"><button class="btn btn-sm btn-cyan" onclick="exportData()">⬇ Download backup</button><button class="btn btn-sm btn-ghost" onclick="$('#imp-file').click()">⬆ Restore from backup</button><button class="btn btn-sm btn-danger" onclick="openReset()">Erase all data</button></div>
+      <input type="file" id="imp-file" accept=".json,application/json" class="hide" onchange="importData(this)"></div>`;
+};
+function setSetting(k, v, label){ DB.settings[k] = v; audit('Setting changed', `${label}: ${v?'on':'off'}`); save(); toast('Setting saved.'); }
+async function copyCode(k){
+  const c = DB.settings[k+'Code'];
+  try{ await navigator.clipboard.writeText(c); toast('Code copied.'); }catch(e){ toast('Couldn\'t copy automatically — reveal the code and copy it by hand.','error'); }
+}
+function openRotate(k){
+  const gen = Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
+  openModal(`<h2>Change ${k} access code</h2><p class="muted mb">The old code stops working straight away.</p><div id="rot-err" class="form-error hide" role="alert"></div>
+    <div class="field"><label for="rot-code">New code</label><input id="rot-code" type="text" autocomplete="off" value="${gen}"><div class="hint">At least 6 characters. Edit it or keep the generated one.</div></div>
+    <button class="btn btn-cyan btn-full" onclick="doRotate('${k}')">Save new code</button>`);
+}
+function doRotate(k){
+  const c = val('rot-code'), other = DB.settings[(k==='admin'?'mentor':'admin')+'Code'];
+  if(c.length < 6) return showErr('rot-err','Codes need at least 6 characters.');
+  if(c === other) return showErr('rot-err','The mentor and admin codes must be different.');
+  DB.settings[k+'Code'] = c; audit(`${k[0].toUpperCase()+k.slice(1)} code changed`, 'Previous code no longer works');
+  save(); closeModal(); view.reveal = Object.assign({}, view.reveal, {[k]:true}); render(); toast('New code saved.');
+}
+function exportData(){
+  confirmBox('Download a backup?','The file contains everything, including private journal entries and messages. Store it somewhere safe.','Download', () => {
+    const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'}), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'focus-lab-backup-'+todayStr()+'.json'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500); audit('Backup downloaded',''); save(); toast('Backup downloaded.');
+  });
+}
+function importData(inp){
+  const f = inp.files[0]; inp.value = ''; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let d; try{ d = JSON.parse(r.result); }catch(e){ return toast('That file isn\'t a valid FOCUS backup.','error'); }
+    if(!d || !Array.isArray(d.users) || !d.settings) return toast('That file isn\'t a valid FOCUS backup.','error');
+    confirmBox('Replace everything with this backup?', `This will overwrite all current data with the backup (${d.users.length} account${d.users.length===1?'':'s'}). You may be signed out.`, 'Restore backup', () => {
+      DB = Object.assign(blankDB(), d, {settings:Object.assign(blankDB().settings, d.settings)}); save();
+      if(!me()) handleLogout(); else { render(); } toast('Backup restored.');
+    }, true);
+  };
+  r.readAsText(f);
+}
+function openReset(){
+  openModal(`<h2 style="color:var(--danger)">Erase all data</h2><p class="muted mb">This permanently deletes every account, goal, message and setting stored in this browser, and returns FOCUS to a blank first-time setup. Download a backup first if you might need anything.</p>
+    <div class="field"><label for="rs-confirm">Type <b>ERASE</b> to confirm</label><input id="rs-confirm" type="text" autocomplete="off"></div>
+    <button class="btn btn-danger btn-full" onclick="doReset()">Erase everything</button>`);
+}
+function doReset(){
+  if(val('rs-confirm') !== 'ERASE') return toast('Type ERASE exactly to confirm.','error');
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  DB = blankDB(); session = null; try{ sessionStorage.removeItem(SKEY); }catch(e){}
+  closeModal(); showPage('home'); toast('All data erased.');
+}
+
+/* ── audit + platform ── */
+VIEWS.admin.audit = u => `${pageHead('Audit Log','A record of important administrative and security actions.')}
+  ${DB.audit.length ? `<div class="card" style="overflow-x:auto"><table><thead><tr><th>When</th><th>Action</th><th>By</th><th>Details</th></tr></thead><tbody>${DB.audit.map(r => `<tr><td class="small muted" style="white-space:nowrap">${fmtDT(r.ts)}</td><td style="font-weight:700">${esc(r.action)}</td><td class="small">${esc(r.by)}</td><td class="small muted">${esc(r.detail)}</td></tr>`).join('')}</tbody></table></div>`
+  : empty('📋','No activity recorded yet','Admin and security actions will be listed here.')}`;
+VIEWS.admin.platform = u => {
+  const S = DB.settings;
+  return `${pageHead('Platform','Names, contact details and check-in rules.')}
+    <div class="card"><div id="pl-err" class="form-error hide" role="alert"></div>
+      <div class="field"><label for="pl-name">Platform name</label><input id="pl-name" type="text" value="${esc(S.platformName)}"></div>
+      <div class="field"><label for="pl-email">Public contact email (optional)</label><input id="pl-email" type="email" value="${esc(S.contactEmail)}" placeholder="Shown on the Contact, Privacy and Terms pages"><div class="hint">Leave empty to use the in-app contact form only.</div></div>
+      <label class="check"><input type="checkbox" id="pl-req" ${S.checkinsRequired?'checked':''}> Weekly check-ins are required (members see reminders and mentors see overdue alerts)</label>
+      <button class="btn btn-cyan mt" onclick="savePlatform()">Save</button></div>`;
+};
+function savePlatform(){
+  const n = val('pl-name'), e = val('pl-email');
+  if(!n) return showErr('pl-err','The platform needs a name.');
+  if(e && !/^\S+@\S+\.\S+$/.test(e)) return showErr('pl-err','That email address doesn\'t look right.');
+  Object.assign(DB.settings, {platformName:n, contactEmail:e, checkinsRequired:$('#pl-req').checked});
+  audit('Platform settings saved',''); save(); toast('Platform settings saved.');
+}
+
+/* ════════ INIT ════════ */
+function buildFooters(){ $$('.site-footer').forEach(f => f.innerHTML = siteFooter()); }
+window.addEventListener('storage', e => {
+  if(e.key !== KEY) return;
+  DB = loadDB();
+  const u = me(); if(!u) { if(session){ render(); } return; }
+  const a = document.activeElement, typing = a && /INPUT|TEXTAREA|SELECT/.test(a.tagName);
+  if(!modalOpen() && !typing) render(); else { buildSidebar(); updateBell(); }
+});
+(function init(){
+  if(!storageOK) $('#storage-banner').classList.remove('hide');
+  buildFooters();
+  const u = me();
+  if(u && u.status==='active'){
+    $('#pub-nav').classList.add('hide');
+    if(u.role==='member' && !u.onboarded) startOnboarding(); else { showPage('app'); render(); }
+  } else { session = null; try{ sessionStorage.removeItem(SKEY); }catch(e){} showPage('home'); }
+})();
+
+</script>
+</body>
+</html>
